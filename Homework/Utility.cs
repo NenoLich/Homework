@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Globalization;
+using System.IO;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Windows.Forms;
@@ -245,6 +246,39 @@ namespace Homework
                     Console.ReadKey();
                     return false;
             }
+        }
+
+        /// <summary>
+        /// Метод возвращает коллекцию имен файлов в указанной директории
+        /// </summary>
+        /// <param name="path">Директория файлов</param>
+        /// <param name="searchPattern">Шаблон для выборки файлов, можно использовать комбинацию с побитовым оператором "|"</param>
+        /// <returns>Коллекция имен файлов</returns>
+        public static List<string> GetFiles(string path, string searchPattern)
+        {
+            string[] searchPatterns = searchPattern.Split('|');
+            List<string> files = new List<string>();
+            foreach (string sp in searchPatterns)
+                files.AddRange(Directory.GetFiles(path, sp));
+            files.Sort();
+            return files;
+        }
+
+        /// <summary>
+        /// Метод возвращает коллекцию имен файлов в указанной директории
+        /// </summary>
+        /// <param name="path">Директория файлов</param>
+        /// <param name="searchPattern">Шаблон для выборки файлов, можно использовать комбинацию с побитовым оператором "|"</param>
+        /// <param name="searchOption">Дополнительные опции поиска</param>
+        /// <returns>Коллекция имен файлов</returns>
+        public static List<string> GetFiles(string path, string searchPattern, SearchOption searchOption)
+        {
+            string[] searchPatterns = searchPattern.Split('|');
+            List<string> files = new List<string>();
+            foreach (string sp in searchPatterns)
+                files.AddRange(Directory.GetFiles(path, sp, searchOption));
+            files.Sort();
+            return files;
         }
 
         public static void HideConsole()
