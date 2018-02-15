@@ -17,6 +17,14 @@ namespace Homework
         public static BufferedGraphics Buffer;
         public static SpaceObject[] spaceObjects;
 
+        private const int minStaticObjectSize = 25;
+        private const int maxStaticObjectSize = 100;
+        private const int formWidth = 800;
+        private const int formHeight = 600;
+        private const int starXmaxDirection = 40;
+
+        private static readonly Point starSize = new Point(10,10);
+
         // Свойства
         // Ширина и высота игрового поля
         public static int Width { get; set; }
@@ -69,12 +77,12 @@ namespace Homework
             spaceObjects = new SpaceObject[imageList.Count];
             for (int i = 0; i < iMax; i++)
             {
-                size = randomize.Next(25, 100);
-                spaceObjects[i] = new SpaceObject(new Point(randomize.Next(0, 800), randomize.Next(0, 600)), new Point(), new Size(size, size), new Bitmap(imageList[i]));
+                size = randomize.Next(minStaticObjectSize, maxStaticObjectSize);
+                spaceObjects[i] = new SpaceObject(new Point(randomize.Next(0, formWidth), randomize.Next(0, formHeight)), new Point(), new Size(size, size), new Bitmap(imageList[i]));
             }
 
             for (int i = iMax; i < spaceObjects.Length; i++)
-                spaceObjects[i] = new Star(new Point(randomize.Next(0, 800), randomize.Next(0, 600)), new Point(randomize.Next(0, 40), 0), new Size(10, 10), new Bitmap(imageList[i]));
+                spaceObjects[i] = new Star(new Point(randomize.Next(0, formWidth), randomize.Next(0, formHeight)), new Point(randomize.Next(0, starXmaxDirection), 0), new Size(starSize), new Bitmap(imageList[i]));
         }
 
         #endregion
