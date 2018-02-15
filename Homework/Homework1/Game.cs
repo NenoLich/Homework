@@ -64,7 +64,7 @@ namespace Homework
 
         public static void Load()
         {
-            List<string> imageList = Utility.GetFiles(@"Homework1\Static objects", "*.jpeg|*.png").ToList();
+            List<string> imageList = Utility.GetFiles(@"Homework1\StaticObjects", "*.jpeg|*.png").ToList();
 
             int iMax = imageList.Count;
             imageList.AddRange(Utility.GetFiles(@"Homework1\Stars", "*.jpeg|*.png"));
