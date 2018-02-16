@@ -12,6 +12,9 @@ using System.Runtime.InteropServices;
 
 namespace Homework
 {
+    /// <summary>
+    /// Главное меню
+    /// </summary>
     public partial class MainForm : Form
     {
         private readonly Timer _timer = new Timer();
@@ -33,11 +36,21 @@ namespace Homework
             _timer.Tick += Time_tick;
         }
 
+        /// <summary>
+        /// Выход из программы
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void Exit_Button_Click(object sender, EventArgs e)
         {
             Application.Exit();
         }
 
+        /// <summary>
+        /// Переход к следующему этапу
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void next_Button_Click(object sender, EventArgs e)
         {
             method_panel.Enabled = true;
@@ -51,12 +64,24 @@ namespace Homework
             if (methods != null) method_comboBox.Items.AddRange(methods);
         }
 
+        #region Method panel
+
+        /// <summary>
+        /// Возврат к предыдущему этапу выбора ДЗ
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void method_back_Button_Click(object sender, EventArgs e)
         {
             homework_panel.Enabled = true;
             method_panel.Enabled = false;
         }
 
+        /// <summary>
+        /// Попытка вызова метода, соответсвующего ДЗ
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void method_next_Button_Click(object sender, EventArgs e)
         {
             if (method_comboBox.SelectedItem == null)
@@ -70,6 +95,9 @@ namespace Homework
             MethodInvoke();
         }
 
+        /// <summary>
+        /// Проверка на наличие параметров выбранного метода
+        /// </summary>
         private void MethodInvoke()
         {
             _method = (MethodInfo)method_comboBox.SelectedItem;
@@ -92,6 +120,9 @@ namespace Homework
             }
         }
 
+        /// <summary>
+        /// Создание экземпляра класса из иерархии Homework и вызов метода
+        /// </summary>
         private void Execution()
         {
             Homework homework = (Homework)Activator.CreateInstance((Type)homeworks_comboBox.SelectedItem);
@@ -103,6 +134,15 @@ namespace Homework
             method_label.ForeColor = DefaultForeColor;
         }
 
+        #endregion
+
+        #region Parameters panel
+
+        /// <summary>
+        /// Считывание введенного параметра
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void apply_Button_Click(object sender, EventArgs e)
         {
             if (Utility.TryRead(parameters_textBox.Text, out _parameters[parameters_comboBox.SelectedIndex], Utility.TryReadConditions.WithoutConsoleRequest))
@@ -121,22 +161,44 @@ namespace Homework
             parameters_textBox.Focus();
         }
 
+        /// <summary>
+        /// Переход к выполнению метода
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void parameters_next_button_Click(object sender, EventArgs e)
         {
             Execution();
         }
 
+        /// <summary>
+        /// Возврат к предыдущему этапу
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void parameters_back_button_Click(object sender, EventArgs e)
         {
             method_panel.Enabled = true;
             parameters_panel.Enabled = false;
         }
 
+        /// <summary>
+        /// Очистка поля для другого параметра
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void parameters_comboBox_SelectedIndexChanged(object sender, EventArgs e)
         {
             parameters_textBox.Clear();
         }
 
+        #endregion
+
+        /// <summary>
+        /// Сокрытие консоли
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void MainMenu_Activated(object sender, EventArgs e)
         {
             Utility.HideConsole();

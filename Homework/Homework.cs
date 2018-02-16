@@ -24,7 +24,7 @@ namespace Homework
                 return;
             }
 
-            Console.ReadKey();
+            //Console.ReadKey();
             Utility.HideConsole();
         }
 

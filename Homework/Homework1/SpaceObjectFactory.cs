@@ -7,9 +7,16 @@ using System.Threading.Tasks;
 
 namespace Homework
 { 
+    /// <summary>
+    /// Иерархия фабрик для создания SpaceObjects
+    /// </summary>
     abstract class SpaceObjectFactory
     {
         protected static Random randomize = new Random();
+
+        /// <summary>
+        /// Словарь содержащий все возможные точки на экране и их занятость обьектами иерархии SpaceObjects
+        /// </summary>
         protected static Dictionary<Point, bool> freeSqreenSpace = 
             FillPointList(new Point(0,0), Game.Width, Game.Height).ToDictionary(x => x, x => true);
 
@@ -57,6 +64,10 @@ namespace Homework
             return leftTopImagePoint;
         }*/
 
+        /// <summary>
+        /// Создание точки для расположения изображения на экране
+        /// </summary>
+        /// <returns></returns>
         protected virtual Point? GetLegalPoint()
         {
             List<Point> imagePoints=new List<Point>(size*size);
@@ -72,6 +83,11 @@ namespace Homework
             return null;
         }
 
+        /// <summary>
+        /// Проверка точки на "занятость" другим обьектом
+        /// </summary>
+        /// <param name="imagePoints"></param>
+        /// <returns></returns>
         private bool HasAvailableSpace(List<Point> imagePoints)
         {
             if (freeSqreenSpace.AsParallel().Join(imagePoints.AsParallel(),x=>x.Key,y=>y,(x,y)=>x.Value).Contains(false))
@@ -82,6 +98,10 @@ namespace Homework
             return true;
         }
 
+        /// <summary>
+        /// Бронирование пространства за обьектом
+        /// </summary>
+        /// <param name="imagePoints"></param>
         private void ReserveSpace(List<Point> imagePoints)
         {
             foreach (Point imagePoint in imagePoints)
