@@ -16,7 +16,7 @@ namespace Homework
         protected int size;
         protected Image image;
 
-        protected int maxIterationCount = 50;
+        //protected const int maxIterationCount = 50;
 
         public SpaceObjectFactory(Image image)
         {
@@ -36,32 +36,45 @@ namespace Homework
 
         public abstract SpaceObject Create();
 
-        protected virtual Point GetLegalPoint()
+        /*protected virtual Point? GetLegalPoint()
         {
-            List<Point> imagePoints=new List<Point>(size*size);
-            Point leftTopImagePoint =new Point();
+            List<Point> imagePoints = new List<Point>(size * size);
+            Point leftTopImagePoint = new Point();
             int iterationCount = 0;
 
             do
             {
                 leftTopImagePoint = new Point(randomize.Next(0, Game.Width - size), randomize.Next(0, Game.Height - size));
-                imagePoints.AddRange(FillPointList(leftTopImagePoint,size, size));
+                imagePoints.AddRange(FillPointList(leftTopImagePoint, size, size));
                 if (++iterationCount == maxIterationCount)
                 {
-                    throw new TimeoutException();
+                    return null;
                 }
             }
             while (!HasAvailableSpace(imagePoints));
-
             
-
             ReserveSpace(imagePoints);
             return leftTopImagePoint;
+        }*/
+
+        protected virtual Point? GetLegalPoint()
+        {
+            List<Point> imagePoints=new List<Point>(size*size);
+            Point leftTopImagePoint = new Point(randomize.Next(0, Game.Width - size), randomize.Next(0, Game.Height - size));
+
+            imagePoints.AddRange(FillPointList(leftTopImagePoint, size, size));
+            if (HasAvailableSpace(imagePoints))
+            {
+                ReserveSpace(imagePoints);
+                return leftTopImagePoint;
+            }
+
+            return null;
         }
 
         private bool HasAvailableSpace(List<Point> imagePoints)
         {
-            if (freeSqreenSpace.Join(imagePoints,x=>x.Key,y=>y,(x,y)=>x.Value).Contains(false))
+            if (freeSqreenSpace.AsParallel().Join(imagePoints.AsParallel(),x=>x.Key,y=>y,(x,y)=>x.Value).Contains(false))
             {
                 return false;
             }

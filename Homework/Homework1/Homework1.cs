@@ -17,7 +17,6 @@ namespace Homework
             asteroidsForm.Height = 600;
             Game.Init(asteroidsForm);
             asteroidsForm.ShowDialog();
-            Game.Draw();
         }
     }
 }

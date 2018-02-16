@@ -63,19 +63,17 @@ namespace Homework
             {
                 throw new NullReferenceException("Файлы повреждены или отсутсвуют");
             }
-
+            
             spaceObjects = new SpaceObject[imageList.Count];
             try
             {
                 for (int i = 0; i < iMax; i++)
                 {
                     spaceObjects[i] = new StarFactory(new Bitmap(imageList[i])).Create();
-                    MessageBox.Show($"{i}");
                 }
 
                 for (int i = iMax; i < spaceObjects.Length; i++)
                     spaceObjects[i] = new StaticObjectFactory(new Bitmap(imageList[i])).Create();
-                
 
             }
             catch (TimeoutException)

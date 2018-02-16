@@ -20,7 +20,12 @@ namespace Homework
         {
             size = randomize.Next(minStaticObjectSize, maxStaticObjectSize);
 
-            return new StaticObject(GetLegalPoint(), new Point(), new Size(size, size), image);
+            Point? legalPoint = GetLegalPoint();
+            if (legalPoint is null)
+            {
+                return null;
+            }
+            return new StaticObject((Point)legalPoint, new Point(), new Size(size, size), image);
         }
 
     }

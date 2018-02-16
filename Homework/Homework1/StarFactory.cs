@@ -20,7 +20,12 @@ namespace Homework
         {
             size = starSize;
 
-            return new Star(GetLegalPoint(), new Point(randomize.Next(0, starXmaxDirection), 0), new Size(size, size), image);
+            Point? legalPoint = GetLegalPoint();
+            if (legalPoint is null)
+            {
+                return null;
+            }
+            return new Star((Point)legalPoint, new Point(randomize.Next(0, starXmaxDirection), 0), new Size(size, size), image);
         }
     }
 }
