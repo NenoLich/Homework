@@ -7,41 +7,68 @@ using System.Threading.Tasks;
 
 namespace Homework
 {
-    class SpaceObject
+    abstract class SpaceObject:ICollidable
     {
-        protected Point Position;
-        protected Point Direction;
-        protected Size Size;
-        protected Image Image;
+        public bool HasCollider;
+
+        protected Point position;
+        protected Point direction;
+        protected Size size;
+        protected Image image;
+
+        protected Point Direction
+        {
+            get => direction;
+            set
+            {
+                if (value.X<0 || value.X>50 || value.Y < 0 || value.Y > 50)
+                {
+                    throw new GameObjectException($"Неправильные параметры {nameof(Direction)} обьекта {this.GetType()}");
+                }
+
+                direction=value;
+            }
+        }
 
         public SpaceObject(Point position, Point direction, Size size)
         {
-            Position = position;
+            this.position = position;
             Direction = direction;
-            Size = size;
+            this.size = size;
         }
         public SpaceObject(Point position, Point direction, Size size, Image image)
         {
-            Position = position;
+            this.position = position;
             Direction = direction;
-            Size = size;
-            Image = image;
+            this.size = size;
+            this.image = image;
 
         }
         public virtual void Draw()
         {
-            Game.Buffer.Graphics.DrawImage(Image, Position.X, Position.Y, Size.Width, Size.Height);
-            //Game.Buffer.Graphics.DrawEllipse(Pens.White, Position.X, Position.Y, Size.Width, Size.Height);
+            Game.Buffer.Graphics.DrawImage(image, position.X, position.Y, size.Width, size.Height);
         }
-        public virtual void Update()
+
+        public abstract void Update();
+
+        public virtual void Relocate()
         {
-            //Position.X = Position.X + Direction.X;
-            //Position.Y = Position.Y + Direction.Y;
-            //if (Position.X < 0) Direction.X = -Direction.X;
-            //if (Position.X > Game.Width) Direction.X = -Direction.X;
-            //if (Position.Y < 0) Direction.Y = -Direction.Y;
-            //if (Position.Y > Game.Height) Direction.Y = -Direction.Y;
         }
+
+        public virtual void Relocate(int positionHeight)
+        {
+        }
+
+        #region ICollidable implementation
+
+        public bool Collide(ICollidable obj)
+        {
+             return obj.Rect.IntersectsWith(this.Rect);
+        }
+
+        public Rectangle Rect => new Rectangle(position, size);
+
+        #endregion
 
     }
 }

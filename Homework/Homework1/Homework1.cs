@@ -22,8 +22,10 @@ namespace Homework
             Form asteroidsForm = new Form ();
             asteroidsForm.Width = 800;
             asteroidsForm.Height = 600;
-            Game.Awake(asteroidsForm);
-            asteroidsForm.ShowDialog();
+            if (Game.Awake(asteroidsForm))
+            {
+                asteroidsForm.ShowDialog();
+            }
         }
     }
 }

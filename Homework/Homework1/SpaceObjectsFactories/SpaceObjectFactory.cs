@@ -12,8 +12,6 @@ namespace Homework
     /// </summary>
     abstract class SpaceObjectFactory
     {
-        protected static Random randomize = new Random();
-        
         protected ScreenSpaceController screenSpaceController;
 
         protected int size;

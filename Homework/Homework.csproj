@@ -45,15 +45,21 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Homework1\GameObjectException.cs" />
+    <Compile Include="Homework1\SpaceObjectsFactories\AsteroidFactory.cs" />
+    <Compile Include="Homework1\SpaceObjects\Asteroid.cs" />
+    <Compile Include="Homework1\SpaceObjects\Bullet.cs" />
+    <Compile Include="Homework1\SpaceObjectsFactories\BulletFactory.cs" />
     <Compile Include="Homework1\Game.cs" />
     <Compile Include="Homework1\Homework1.cs" />
+    <Compile Include="Homework1\ICollidable.cs" />
     <Compile Include="Homework1\Overlay.cs" />
     <Compile Include="Homework1\ScreenSpaceController.cs" />
-    <Compile Include="Homework1\SpaceObjectFactory.cs" />
-    <Compile Include="Homework1\Star.cs" />
-    <Compile Include="Homework1\StarFactory.cs" />
-    <Compile Include="Homework1\StaticObject.cs" />
-    <Compile Include="Homework1\StaticObjectFactory.cs" />
+    <Compile Include="Homework1\SpaceObjectsFactories\SpaceObjectFactory.cs" />
+    <Compile Include="Homework1\SpaceObjects\Star.cs" />
+    <Compile Include="Homework1\SpaceObjectsFactories\StarFactory.cs" />
+    <Compile Include="Homework1\SpaceObjects\StaticObject.cs" />
+    <Compile Include="Homework1\SpaceObjectsFactories\StaticObjectFactory.cs" />
     <Compile Include="MainForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -63,7 +69,7 @@
     <Compile Include="Homework.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Homework1\SpaceObject.cs" />
+    <Compile Include="Homework1\SpaceObjects\SpaceObject.cs" />
     <Compile Include="Utility.cs" />
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>

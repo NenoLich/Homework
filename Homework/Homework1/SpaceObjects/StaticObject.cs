@@ -11,11 +11,16 @@ namespace Homework
     {
         public StaticObject(Point pos, Point dir, Size size) : base(pos, dir, size)
         {
-
+            HasCollider = false;
         }
         public StaticObject(Point pos, Point dir, Size size, Image image) : base(pos, dir, size, image)
         {
+            HasCollider = false;
+        }
 
+        public override void Update()
+        {
+            
         }
     }
 }

@@ -13,17 +13,45 @@ namespace Homework
     {
         #region Vars and Props
 
+        public static Random randomizer=new Random();
+
         private static BufferedGraphicsContext context;
         public static BufferedGraphics Buffer;
 
+        private static int width;
+        private static int height;
         private static List<Bullet> bullets;
         private static List<SpaceObject> spaceObjects;
         private static ScreenSpaceController screenSpaceController;
+        private static Overlay overlay;
 
         // Свойства
         // Ширина и высота игрового поля
-        public static int Width { get; set; }
-        public static int Height { get; set; }
+        public static int Width
+        {
+            get=> width;
+            set
+            {
+                if (value<0 || value>1000)
+                {
+                    throw new ArgumentOutOfRangeException($"Недопустимое значение ширины игрового поля {nameof(Form.Width)}");
+                }
+                width = value;
+            }
+        }
+        public static int Height
+        {
+            get => height;
+            set
+            {
+                if (value < 0 || value > 1000)
+                {
+                    throw new ArgumentOutOfRangeException($"Недопустимое значение ширины игрового поля {nameof(Form.Height)}");
+                }
+                height = value;
+            }
+        }
+
 
         #endregion
 
@@ -33,12 +61,21 @@ namespace Homework
         {
         }
 
-        public static void Awake(Form form)
+        public static bool Awake(Form form)
         {
             // Запоминаем размеры формы
-            
-            Width = form.Width;
-            Height = form.Height;
+            try
+            {
+                Width = form.Width;
+                Height = form.Height;
+            }
+            catch (ArgumentOutOfRangeException e)
+            {
+                MessageBox.Show(e.Message);
+                form.Close();
+                return false;
+            }
+           
             // Графическое устройство для вывода графики
 
             // предоставляет доступ к главному буферу графического контекста для текущего приложения
@@ -51,7 +88,9 @@ namespace Homework
             timer.Start();
             timer.Tick += Timer_Tick;
 
-            Overlay overlay=new Overlay(form);
+            overlay=new Overlay(form);
+
+            return true;
         }
 
         private static void Timer_Tick(object sender, EventArgs e)
@@ -84,18 +123,19 @@ namespace Homework
             spaceObjects = new List<SpaceObject>();
             try
             {
+                spaceObjects.Add(new Star(new Point(23,44),new Point(-1,-4),new Size()  ));
                 for (int i = 0; i < iMax; i++)
                 {
-                    spaceObjects[i] = new StarFactory(screenSpaceController,new Bitmap(imageList[i])).Create();
+                    spaceObjects.Add(new StarFactory(screenSpaceController, new Bitmap(imageList[i])).Create());
                 }
 
-                for (int i = iMax; i < spaceObjects.Count; i++)
-                    spaceObjects[i] = new StaticObjectFactory(screenSpaceController, new Bitmap(imageList[i])).Create();
+                for (int i = iMax; i < imageList.Count; i++)
+                    spaceObjects.Add(new StaticObjectFactory(screenSpaceController, new Bitmap(imageList[i])).Create());
 
             }
-            catch (TimeoutException)
+            catch (GameObjectException)
             {
-                MessageBox.Show("Too many SpaceObjects");
+                
             }
         }
 
@@ -136,7 +176,7 @@ namespace Homework
                 foreach (SpaceObject obj in spaceObjects)
                 {
                     obj?.Update();
-                    if (obj!=null && bullets != null)
+                    if (obj!=null && obj.HasCollider && bullets != null)
                     {
                         CheckCollision(obj);
                     }
@@ -154,6 +194,8 @@ namespace Homework
                     bullets[i].Dispose();
                     bullets.RemoveAt(i);
                     i--;
+
+                    obj.Relocate();
                     //Движение астероида
                 }
             }

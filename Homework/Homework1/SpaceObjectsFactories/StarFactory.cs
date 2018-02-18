@@ -25,7 +25,7 @@ namespace Homework
             {
                 return null;
             }
-            return new Star((Point)legalPoint, new Point(randomize.Next(0, starXmaxDirection), 0), new Size(size, size), image);
+            return new Star((Point)legalPoint, new Point(Game.randomizer.Next(0, starXmaxDirection), 0), new Size(size, size), image);
         }
 
         

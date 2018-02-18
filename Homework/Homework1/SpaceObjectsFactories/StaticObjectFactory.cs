@@ -18,7 +18,7 @@ namespace Homework
 
         public override SpaceObject Create()
         {
-            size = randomize.Next(minStaticObjectSize, maxStaticObjectSize);
+            size = Game.randomizer.Next(minStaticObjectSize, maxStaticObjectSize);
 
             Point? legalPoint = screenSpaceController.GetLegalPoint(size);
             if (legalPoint is null)
