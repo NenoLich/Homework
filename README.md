@@ -1,6 +1,6 @@
 # Homework
 
-![Preview](https://github.com/NenoLich/Homework/blob/HomeworkDevelop/Preview.jpg)
+![Preview](https://github.com/NenoLich/Homework/blob/Master/Preview.jpg)
 
 Домашние задания для [Geekbrains.ru](https://geekbrains.ru) c# Уровень 2.
 
@@ -8,4 +8,4 @@
 
 INSTALLATION
 ------------
-Для корректной работы сборки пожалуйста воспользуйтесь файлом [Install.bat](https://github.com/NenoLich/Homework/blob/HomeworkDevelop/Install.bat)
+Для корректной работы сборки пожалуйста воспользуйтесь файлом [Install.bat](https://github.com/NenoLich/Homework/blob/Master/Install.bat)

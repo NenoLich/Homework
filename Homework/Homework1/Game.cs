@@ -16,7 +16,8 @@ namespace Homework
         private static BufferedGraphicsContext context;
         public static BufferedGraphics Buffer;
 
-        private static SpaceObject[] spaceObjects;
+        private static List<Bullet> bullets;
+        private static List<SpaceObject> spaceObjects;
         private static ScreenSpaceController screenSpaceController;
 
         // Свойства
@@ -68,7 +69,9 @@ namespace Homework
         /// </summary>
         public static void Start()
         {
+            bullets=new List<Bullet>();
             screenSpaceController = new ScreenSpaceController();
+
             List<string> imageList = Utility.GetFiles(@"Homework1\Stars", "*.jpeg|*.png").ToList();
 
             int iMax = imageList.Count;
@@ -78,7 +81,7 @@ namespace Homework
                 throw new NullReferenceException("Файлы повреждены или отсутсвуют");
             }
 
-            spaceObjects = new SpaceObject[imageList.Count];
+            spaceObjects = new List<SpaceObject>();
             try
             {
                 for (int i = 0; i < iMax; i++)
@@ -86,7 +89,7 @@ namespace Homework
                     spaceObjects[i] = new StarFactory(screenSpaceController,new Bitmap(imageList[i])).Create();
                 }
 
-                for (int i = iMax; i < spaceObjects.Length; i++)
+                for (int i = iMax; i < spaceObjects.Count; i++)
                     spaceObjects[i] = new StaticObjectFactory(screenSpaceController, new Bitmap(imageList[i])).Create();
 
             }
@@ -102,12 +105,8 @@ namespace Homework
 
         public static void Draw()
         {
-            // Проверяем вывод графики
             Buffer.Graphics.Clear(Color.Black);
-            //Buffer.Graphics.DrawRectangle(Pens.White, new Rectangle(100, 100, 200, 200));
-            //Buffer.Graphics.FillEllipse(Brushes.Wheat, new Rectangle(100, 100, 200, 200));
-            //Buffer.Render();
-            //Buffer.Graphics.Clear(Color.Black);
+
             if (spaceObjects !=null)
             {
                 foreach (SpaceObject obj in spaceObjects)
@@ -124,10 +123,39 @@ namespace Homework
         }
         public static void Update()
         {
+            //Добавление астероидов
+
+            if (bullets != null)
+            {
+                foreach (Bullet bullet in bullets)
+                    bullet?.Update();
+            }
+
             if (spaceObjects != null)
             {
                 foreach (SpaceObject obj in spaceObjects)
+                {
                     obj?.Update();
+                    if (obj!=null && bullets != null)
+                    {
+                        CheckCollision(obj);
+                    }
+                }
+            }
+        }
+
+        private static void CheckCollision(SpaceObject obj)
+        {
+            for (int i = 0; i < bullets.Count; i++)
+            {
+                if (bullets[i]!=null && bullets[i].Collide(obj))
+                {
+                    System.Media.SystemSounds.Hand.Play();
+                    bullets[i].Dispose();
+                    bullets.RemoveAt(i);
+                    i--;
+                    //Движение астероида
+                }
             }
         }
 
