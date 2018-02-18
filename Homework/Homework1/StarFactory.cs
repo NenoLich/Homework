@@ -12,7 +12,7 @@ namespace Homework
         private const int starXmaxDirection = 40;
         private const int starSize = 10;
 
-        public StarFactory(Image image) : base(image)
+        public StarFactory(ScreenSpaceController screenSpaceController, Image image) : base(screenSpaceController, image)
         {
         }
 
@@ -20,12 +20,14 @@ namespace Homework
         {
             size = starSize;
 
-            Point? legalPoint = GetLegalPoint();
+            Point? legalPoint = screenSpaceController.GetLegalPoint(size);
             if (legalPoint is null)
             {
                 return null;
             }
             return new Star((Point)legalPoint, new Point(randomize.Next(0, starXmaxDirection), 0), new Size(size, size), image);
         }
+
+        
     }
 }

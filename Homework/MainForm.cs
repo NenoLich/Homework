@@ -75,6 +75,7 @@ namespace Homework
         {
             homework_panel.Enabled = true;
             method_panel.Enabled = false;
+            method_comboBox.Items.Clear();
         }
 
         /// <summary>

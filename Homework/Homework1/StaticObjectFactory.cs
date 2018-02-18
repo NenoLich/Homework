@@ -12,7 +12,7 @@ namespace Homework
         private const int minStaticObjectSize = 25;
         private const int maxStaticObjectSize = 100;
 
-        public StaticObjectFactory(Image image) : base(image)
+        public StaticObjectFactory(ScreenSpaceController screenSpaceController, Image image) : base(screenSpaceController, image)
         {
         }
 
@@ -20,7 +20,7 @@ namespace Homework
         {
             size = randomize.Next(minStaticObjectSize, maxStaticObjectSize);
 
-            Point? legalPoint = GetLegalPoint();
+            Point? legalPoint = screenSpaceController.GetLegalPoint(size);
             if (legalPoint is null)
             {
                 return null;

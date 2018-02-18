@@ -14,9 +14,10 @@ namespace Homework
         #region Vars and Props
 
         private static BufferedGraphicsContext context;
-
         public static BufferedGraphics Buffer;
-        public static SpaceObject[] spaceObjects;
+
+        private static SpaceObject[] spaceObjects;
+        private static ScreenSpaceController screenSpaceController;
 
         // Свойства
         // Ширина и высота игрового поля
@@ -31,7 +32,7 @@ namespace Homework
         {
         }
 
-        public static void Init(Form form)
+        public static void Awake(Form form)
         {
             // Запоминаем размеры формы
             
@@ -49,7 +50,7 @@ namespace Homework
             timer.Start();
             timer.Tick += Timer_Tick;
 
-            CreateMenu(form);
+            Overlay overlay=new Overlay(form);
         }
 
         private static void Timer_Tick(object sender, EventArgs e)
@@ -60,98 +61,14 @@ namespace Homework
 
         #endregion
 
-        /// <summary>
-        /// Создание панели Меню с кнопками: "New Game", "Records", "Exit"
-        /// </summary>
-        /// <param name="form"></param>
-        #region CreateMenu
-
-        private static void CreateMenu(Form form)
-        {
-            Panel menu = new Panel();
-            menu.Size = new Size(300, 400);
-            menu.BorderStyle = BorderStyle.Fixed3D;
-
-            Label mainMenuLabel = new Label
-            {
-                AutoSize = true,
-                Font = new Font("Franklin Gothic Medium", 12F, System.Drawing.FontStyle.Regular,
-                    GraphicsUnit.Point, ((byte) (204))),
-                Location = new Point(105, 55),
-                Size = new Size(140, 40),
-                Text = "Main Menu"
-            };
-            menu.Controls.Add(mainMenuLabel);
-
-            Button newGame_button = new Button
-            {
-                Font = new Font("Franklin Gothic Medium", 12F, System.Drawing.FontStyle.Regular,
-                    GraphicsUnit.Point, ((byte)(204))),
-                Location = new Point(80, 130),
-                Size = new Size(140, 40),
-                Text = "New Game",
-                UseVisualStyleBackColor = true
-            };
-            newGame_button.Click += newGame_button_Click;
-            menu.Controls.Add(newGame_button);
-
-            Button records_button = new Button
-            {
-                Font = new Font("Franklin Gothic Medium", 12F, System.Drawing.FontStyle.Regular,
-                    GraphicsUnit.Point, ((byte)(204))),
-                Location = new Point(80, 210),
-                Size = new Size(140, 40),
-                Text = "Records",
-                UseVisualStyleBackColor = true
-            };
-            records_button.Click += records_button_Click;
-            menu.Controls.Add(records_button);
-
-            Button exit_button = new Button
-            {
-                Font = new Font("Franklin Gothic Medium", 12F, System.Drawing.FontStyle.Regular,
-                    GraphicsUnit.Point, ((byte)(204))),
-                Location = new Point(80, 290),
-                Size = new Size(140, 40),
-                Text = "Exit",
-                UseVisualStyleBackColor = true
-            };
-            exit_button.Click += exit_button_Click;
-            menu.Controls.Add(exit_button);
-
-            menu.Location=new Point(250,100);
-            form.Controls.Add(menu);
-            form.AcceptButton = newGame_button;
-            form.CancelButton = exit_button;
-        }
-
-        private static void exit_button_Click(object sender, EventArgs e)
-        {
-            Button button = sender as Button;
-            button.FindForm().Close();
-        }
-
-        private static void records_button_Click(object sender, EventArgs e)
-        {
-            
-        }
-
-        private static void newGame_button_Click(object sender, EventArgs e)
-        {
-            Button button = sender as Button;
-            button.Parent.Visible = false;
-            Load();
-        }
-
-        #endregion
-
         #region Start
 
         /// <summary>
         /// Создание обьектов иерархии SpaceObject
         /// </summary>
-        public static void Load()
+        public static void Start()
         {
+            screenSpaceController = new ScreenSpaceController();
             List<string> imageList = Utility.GetFiles(@"Homework1\Stars", "*.jpeg|*.png").ToList();
 
             int iMax = imageList.Count;
@@ -166,11 +83,11 @@ namespace Homework
             {
                 for (int i = 0; i < iMax; i++)
                 {
-                    spaceObjects[i] = new StarFactory(new Bitmap(imageList[i])).Create();
+                    spaceObjects[i] = new StarFactory(screenSpaceController,new Bitmap(imageList[i])).Create();
                 }
 
                 for (int i = iMax; i < spaceObjects.Length; i++)
-                    spaceObjects[i] = new StaticObjectFactory(new Bitmap(imageList[i])).Create();
+                    spaceObjects[i] = new StaticObjectFactory(screenSpaceController, new Bitmap(imageList[i])).Create();
 
             }
             catch (TimeoutException)

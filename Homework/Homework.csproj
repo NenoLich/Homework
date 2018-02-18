@@ -47,6 +47,8 @@
   <ItemGroup>
     <Compile Include="Homework1\Game.cs" />
     <Compile Include="Homework1\Homework1.cs" />
+    <Compile Include="Homework1\Overlay.cs" />
+    <Compile Include="Homework1\ScreenSpaceController.cs" />
     <Compile Include="Homework1\SpaceObjectFactory.cs" />
     <Compile Include="Homework1\Star.cs" />
     <Compile Include="Homework1\StarFactory.cs" />
