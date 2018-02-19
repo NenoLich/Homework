@@ -9,8 +9,13 @@ using System.Windows.Forms;
 
 namespace Homework
 {
+    /// <summary>
+    /// Класс, отвечающий за UI
+    /// </summary>
     class Overlay
     {
+        #region Vars and Ctors
+
         private Form form;
         private Panel mainMenu;
         private Panel optionsMenu;
@@ -21,6 +26,8 @@ namespace Homework
             CreateMainMenu();
             CreateOptionsMenu();
         }
+
+        #endregion
 
         #region Templates
 
@@ -131,7 +138,10 @@ namespace Homework
         }
 
         #endregion
-
+        
+        /// <summary>
+        /// Меню опций
+        /// </summary>
         #region OptionsMenu
 
         private void CreateOptionsMenu()

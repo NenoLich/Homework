@@ -6,6 +6,9 @@ using System.Threading.Tasks;
 
 namespace Homework
 {
+    /// <summary>
+    /// Содержит информацию о том, где будет инстанцироваться обьект
+    /// </summary>
     public enum SpawnType
     {
         OnScreen,

@@ -10,6 +10,9 @@ using System.Windows.Forms;
 
 namespace Homework
 {
+    /// <summary>
+    /// Управляет доступом к игровому полю
+    /// </summary>
     class ScreenSpaceController
     {
         /// <summary>
@@ -17,17 +20,20 @@ namespace Homework
         /// </summary>
         public Dictionary<Point, bool> freeSqreenSpace;
 
+        private SpawnType spawnType;
         private static Random randomize = new Random();
 
         public ScreenSpaceController(SpawnType spawnType)
         {
-            switch (spawnType)
+            this.spawnType = spawnType;
+
+            switch (this.spawnType)
             {
                 case SpawnType.OnScreen:
                     freeSqreenSpace = FillPointList(new Point(0, 0), Game.Width, Game.Height).ToDictionary(x => x, x => true);
                     break;
                 case SpawnType.OutOfScreen:
-                    freeSqreenSpace = FillPointList(new Point(Game.Width, 0), 1, Game.Height).ToDictionary(x => x, x => true);
+                    freeSqreenSpace = FillPointList(new Point(Game.Width, 0), 0, Game.Height).ToDictionary(x => x, x => true);
                     break;
             }
         }
@@ -50,7 +56,17 @@ namespace Homework
         public virtual Point? GetLegalPoint(int size)
         {
             List<Point> imagePoints = new List<Point>(size * size);
-            Point leftTopImagePoint = new Point(randomize.Next(0, Game.Width - size), randomize.Next(0, Game.Height - size));
+            Point leftTopImagePoint=new Point(); 
+
+            switch (spawnType)
+            {
+                case SpawnType.OnScreen:
+                    leftTopImagePoint = new Point(randomize.Next(0, Game.Width - size), randomize.Next(0, Game.Height - size));
+                    break;
+                case SpawnType.OutOfScreen:
+                    leftTopImagePoint = new Point(Game.Width, randomize.Next(0, Game.Height - size));
+                    break;
+            }
 
             imagePoints.AddRange(FillPointList(leftTopImagePoint, size, size));
             if (HasAvailableSpace(imagePoints))
@@ -88,7 +104,5 @@ namespace Homework
                 freeSqreenSpace[imagePoint] = false;
             }
         }
-
-
     }
 }

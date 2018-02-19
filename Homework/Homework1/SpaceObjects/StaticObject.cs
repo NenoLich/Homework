@@ -7,6 +7,9 @@ using System.Threading.Tasks;
 
 namespace Homework
 {
+    /// <summary>
+    /// Статические обьекты звездного неба
+    /// </summary>
     class StaticObject: SpaceObject
     {
         public StaticObject(Point pos, Point dir, Size size) : base(pos, dir, size)

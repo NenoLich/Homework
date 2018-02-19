@@ -9,6 +9,9 @@ using Microsoft.Win32.SafeHandles;
 
 namespace Homework
 {
+    /// <summary>
+    /// Базовый абстрактный класс для всех космических обьектов
+    /// </summary>
     abstract class SpaceObject: ICollidable, IDisposable
     {
         public bool HasCollider;

@@ -7,6 +7,9 @@ using System.Threading.Tasks;
 
 namespace Homework
 {
+    /// <summary>
+    /// Описывает обьекты имеющие "физическое" тело
+    /// </summary>
     interface ICollidable
     {
         bool Collide(ICollidable obj);

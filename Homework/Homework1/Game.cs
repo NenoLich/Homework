@@ -9,6 +9,9 @@ using System.Windows.Forms;
 
 namespace Homework
 {
+    /// <summary>
+    /// Управляет игровым процессом
+    /// </summary>
     static class Game
     {
         #region Vars and Props
@@ -18,7 +21,12 @@ namespace Homework
         private static BufferedGraphicsContext context;
         public static BufferedGraphics Buffer;
 
+        /// <summary>
+        /// Счетчик срабатываний метода Update, 
+        /// осуществляет замену конструкции с использованием дополнительных Timer'ов и методов Update
+        /// </summary>
         private static int updateCount;
+
         private static int width;
         private static int height;
         private static List<Bullet> bullets;
@@ -26,9 +34,9 @@ namespace Homework
         private static ScreenSpaceController screenSpaceController;
         private static Overlay overlay;
 
-        private const int updateRate = 100;
-        private const int spawnInterval = 1000;
-        private const int spawnCount = 5;
+        private const int updateRate = 100;         //Интервал срабатывания обновления состояния игры
+        private const int spawnInterval = 1000;     //Интервал создания новой партии астероидов
+        private const int spawnCount = 5;           //Количество астероидов в партии
 
         // Свойства
         // Ширина и высота игрового поля
@@ -167,15 +175,13 @@ namespace Homework
             {
             }
         }
+
         public static void Update()
         {
+            
             if (updateCount>=spawnInterval/updateRate)
             {
-                ScreenSpaceController asteroidSpawnController=new ScreenSpaceController(SpawnType.OutOfScreen);
-                for (int i = 0; i < spawnCount; i++)
-                {
-                    spaceObjects.Add(new AsteroidFactory(asteroidSpawnController).Create());
-                }
+                SpawnAsteroids();
 
                 updateCount = 0;
             }
@@ -201,6 +207,23 @@ namespace Homework
             updateCount++;
         }
 
+        /// <summary>
+        /// Добавление в коллекцию космических обьектов партии астероидов
+        /// </summary>
+        private static void SpawnAsteroids()
+        {
+            ScreenSpaceController asteroidSpawnController = new ScreenSpaceController(SpawnType.OutOfScreen);
+            for (int i = 0; i < spawnCount; i++)
+            {
+                spaceObjects.Add(new AsteroidFactory(asteroidSpawnController).Create());
+            }
+        }
+
+        /// <summary>
+        /// Проверка попадания снаряда по астероиду и их последующее взаимоуничтожение
+        /// </summary>
+        /// <param name="obj"></param>
+        /// <returns></returns>
         private static int CheckCollision(SpaceObject obj)
         {
             int collisions = 0;

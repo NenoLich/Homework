@@ -7,6 +7,9 @@ using System.Threading.Tasks;
 
 namespace Homework
 {
+    /// <summary>
+    /// Летящие на заднем фоне звезды
+    /// </summary>
     class Star: SpaceObject
     {
         public Star(Point pos, Point dir, Size size) : base(pos, dir, size)
@@ -18,6 +21,9 @@ namespace Homework
             HasCollider = false;
         }
 
+        /// <summary>
+        /// При выходе за игровую зону переносится в зону видимости, сохраняя то же значение по оси Y
+        /// </summary>
         public override void Update()
         {
             position.X = position.X - Direction.X;

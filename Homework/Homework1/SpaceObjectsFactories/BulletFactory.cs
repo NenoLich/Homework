@@ -7,6 +7,9 @@ using System.Threading.Tasks;
 
 namespace Homework
 {
+    /// <summary>
+    /// Класс в разработке
+    /// </summary>
     class BulletFactory: SpaceObjectFactory
     {
         private static List<Image> bulletImages;

@@ -8,8 +8,14 @@ using System.Threading.Tasks;
 
 namespace Homework
 {
+    /// <summary>
+    /// Враждебные обьекты, наносят урон при столкновении
+    /// </summary>
     class Asteroid: SpaceObject
     {
+        /// <summary>
+        /// Эквивалентно нанесенному урону при столкновении
+        /// </summary>
         public readonly int Power;
 
         public Asteroid(Point position, Point direction, Size size) : base(position, direction, size)
@@ -24,6 +30,9 @@ namespace Homework
             Power = size.Height * size.Width / 100;
         }
 
+        /// <summary>
+        /// Вращается на 90° по часовой стрелке, при выходе за экран - переносится в видимую область
+        /// </summary>
         public override void Update()
         {
             position.X = position.X - Direction.X;

@@ -9,8 +9,14 @@ using Microsoft.Win32.SafeHandles;
 
 namespace Homework
 {
+    /// <summary>
+    /// Представляет собой выпущенные боевые снаряды
+    /// </summary>
     class Bullet : SpaceObject
     {
+        /// <summary>
+        /// Скорость полета снаряда
+        /// </summary>
         private static int speed = 3;
 
         public Bullet(Point position, Point direction, Size size) : base(position, direction, size)
@@ -23,6 +29,9 @@ namespace Homework
             HasCollider = true;
         }
 
+        /// <summary>
+        /// При выходе за игровую область обьект ликвидируется
+        /// </summary>
         public override void Update()
         {
             if (position.X > Game.Width)

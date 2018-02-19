@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Forms;
 using Homework;
 
 namespace Homework
@@ -17,21 +19,39 @@ namespace Homework
         private const int minAsteroidSize = 20;
         private const int maxAsteroidSize = 80;
 
+        /// <summary>
+        /// Заполняет коллекцию изображений астероидов, делая прозрачным цвет фона
+        /// </summary>
+        /// <returns></returns>
         private static List<Image> FillImageList()
         {
             List<Image> images=new List<Image>();
-            List<string> imagePaths = Utility.GetFiles(@"Homework1\Asteroids", "*.jpeg|*.png").ToList();
-            for (int i = 0; i < imagePaths.Count; i++)
+            try
             {
-                Bitmap image= new Bitmap(imagePaths[i]);
-                Color backgroundColor = image.GetPixel(1, 1);
-                image.MakeTransparent(backgroundColor);
-                images[i]=image;
+                List<string> imagePaths = Utility.GetFiles(@"Homework1\Asteroids", "*.jpeg|*.png").ToList();
+                if (imagePaths != null)
+                {
+                    for (int i = 0; i < imagePaths.Count; i++)
+                    {
+                        Bitmap image = new Bitmap(imagePaths[i]);
+                        Color backgroundColor = image.GetPixel(1, 1);
+                        image.MakeTransparent(backgroundColor);
+                        images.Add(image);
+                    }
+                }
+            }
+            catch (FileNotFoundException e)
+            {
+                MessageBox.Show(e.Message);
             }
 
             return images;
         }
 
+        /// <summary>
+        /// Изображение астероида генерируется случайным образом из общего списка
+        /// </summary>
+        /// <param name="screenSpaceController"></param>
         public AsteroidFactory(ScreenSpaceController screenSpaceController)
         {
             this.screenSpaceController = screenSpaceController;
