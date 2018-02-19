@@ -9,12 +9,9 @@ using Microsoft.Win32.SafeHandles;
 
 namespace Homework
 {
-    class Bullet : SpaceObject, IDisposable
+    class Bullet : SpaceObject
     {
         private static int speed = 3;
-
-        bool disposed = false;
-        SafeHandle handle = new SafeFileHandle(IntPtr.Zero, true);
 
         public Bullet(Point position, Point direction, Size size) : base(position, direction, size)
         {
@@ -35,29 +32,6 @@ namespace Homework
 
             position.X = position.X + speed;
         }
-
-        #region IDisposable Implementation
-
-        public void Dispose()
-        {
-            Dispose(true);
-            GC.SuppressFinalize(this);
-        }
-
-        protected virtual void Dispose(bool disposing)
-        {
-            if (disposed)
-                return;
-
-            if (disposing)
-            {
-                handle.Dispose();
-            }
-
-            disposed = true;
-        }
-
-        #endregion
 
     }
 }

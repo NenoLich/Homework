@@ -19,9 +19,17 @@ namespace Homework
 
         private static Random randomize = new Random();
 
-        public ScreenSpaceController()
+        public ScreenSpaceController(SpawnType spawnType)
         {
-            freeSqreenSpace = FillPointList(new Point(0, 0), Game.Width, Game.Height).ToDictionary(x => x, x => true);
+            switch (spawnType)
+            {
+                case SpawnType.OnScreen:
+                    freeSqreenSpace = FillPointList(new Point(0, 0), Game.Width, Game.Height).ToDictionary(x => x, x => true);
+                    break;
+                case SpawnType.OutOfScreen:
+                    freeSqreenSpace = FillPointList(new Point(Game.Width, 0), 1, Game.Height).ToDictionary(x => x, x => true);
+                    break;
+            }
         }
 
         private static IEnumerable<Point> FillPointList(Point leftTopPoint, int width, int height)

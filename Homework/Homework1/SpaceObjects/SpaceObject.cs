@@ -2,12 +2,14 @@
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.Win32.SafeHandles;
 
 namespace Homework
 {
-    abstract class SpaceObject:ICollidable
+    abstract class SpaceObject: ICollidable, IDisposable
     {
         public bool HasCollider;
 
@@ -15,6 +17,9 @@ namespace Homework
         protected Point direction;
         protected Size size;
         protected Image image;
+
+        bool disposed = false;
+        SafeHandle handle = new SafeFileHandle(IntPtr.Zero, true);
 
         protected Point Direction
         {
@@ -67,6 +72,29 @@ namespace Homework
         }
 
         public Rectangle Rect => new Rectangle(position, size);
+
+        #endregion
+
+        #region IDisposable Implementation
+
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (disposed)
+                return;
+
+            if (disposing)
+            {
+                handle.Dispose();
+            }
+
+            disposed = true;
+        }
 
         #endregion
 

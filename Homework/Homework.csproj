@@ -60,6 +60,7 @@
     <Compile Include="Homework1\SpaceObjectsFactories\StarFactory.cs" />
     <Compile Include="Homework1\SpaceObjects\StaticObject.cs" />
     <Compile Include="Homework1\SpaceObjectsFactories\StaticObjectFactory.cs" />
+    <Compile Include="Homework1\SpawnType.cs" />
     <Compile Include="MainForm.cs">
       <SubType>Form</SubType>
     </Compile>

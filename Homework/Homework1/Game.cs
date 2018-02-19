@@ -18,12 +18,17 @@ namespace Homework
         private static BufferedGraphicsContext context;
         public static BufferedGraphics Buffer;
 
+        private static int updateCount;
         private static int width;
         private static int height;
         private static List<Bullet> bullets;
         private static List<SpaceObject> spaceObjects;
         private static ScreenSpaceController screenSpaceController;
         private static Overlay overlay;
+
+        private const int updateRate = 100;
+        private const int spawnInterval = 1000;
+        private const int spawnCount = 5;
 
         // Свойства
         // Ширина и высота игрового поля
@@ -84,7 +89,7 @@ namespace Homework
             // Связываем буфер в памяти с графическим объектом.
             // для того, чтобы рисовать в буфере
             Buffer = context.Allocate(graphics, new Rectangle(0, 0, Width, Height));
-            Timer timer = new Timer { Interval = 100 };
+            Timer timer = new Timer { Interval = updateRate };
             timer.Start();
             timer.Tick += Timer_Tick;
 
@@ -109,7 +114,7 @@ namespace Homework
         public static void Start()
         {
             bullets=new List<Bullet>();
-            screenSpaceController = new ScreenSpaceController();
+            screenSpaceController = new ScreenSpaceController(SpawnType.OnScreen);
 
             List<string> imageList = Utility.GetFiles(@"Homework1\Stars", "*.jpeg|*.png").ToList();
 
@@ -123,7 +128,6 @@ namespace Homework
             spaceObjects = new List<SpaceObject>();
             try
             {
-                spaceObjects.Add(new Star(new Point(23,44),new Point(-1,-4),new Size()  ));
                 for (int i = 0; i < iMax; i++)
                 {
                     spaceObjects.Add(new StarFactory(screenSpaceController, new Bitmap(imageList[i])).Create());
@@ -137,6 +141,8 @@ namespace Homework
             {
                 
             }
+
+            updateCount = 0;
         }
 
         #endregion
@@ -163,7 +169,16 @@ namespace Homework
         }
         public static void Update()
         {
-            //Добавление астероидов
+            if (updateCount>=spawnInterval/updateRate)
+            {
+                ScreenSpaceController asteroidSpawnController=new ScreenSpaceController(SpawnType.OutOfScreen);
+                for (int i = 0; i < spawnCount; i++)
+                {
+                    spaceObjects.Add(new AsteroidFactory(asteroidSpawnController).Create());
+                }
+
+                updateCount = 0;
+            }
 
             if (bullets != null)
             {
@@ -173,19 +188,22 @@ namespace Homework
 
             if (spaceObjects != null)
             {
-                foreach (SpaceObject obj in spaceObjects)
+                for (int i = 0; i < spaceObjects.Count; i++)
                 {
-                    obj?.Update();
-                    if (obj!=null && obj.HasCollider && bullets != null)
+                    spaceObjects[i]?.Update();
+                    if (spaceObjects[i] != null && spaceObjects[i].HasCollider && bullets != null)
                     {
-                        CheckCollision(obj);
+                        i-=CheckCollision(spaceObjects[i]);
                     }
                 }
             }
+
+            updateCount++;
         }
 
-        private static void CheckCollision(SpaceObject obj)
+        private static int CheckCollision(SpaceObject obj)
         {
+            int collisions = 0;
             for (int i = 0; i < bullets.Count; i++)
             {
                 if (bullets[i]!=null && bullets[i].Collide(obj))
@@ -195,10 +213,15 @@ namespace Homework
                     bullets.RemoveAt(i);
                     i--;
 
-                    obj.Relocate();
+                    obj.Dispose();
+                    spaceObjects.Remove(obj);
+                    collisions++;
+                    //obj.Relocate();
                     //Движение астероида
                 }
             }
+
+            return collisions;
         }
 
         #endregion

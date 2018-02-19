@@ -25,6 +25,11 @@ namespace Homework
             this.image = image;
         }
 
+        protected SpaceObjectFactory()
+        {
+            
+        }
+
         public abstract SpaceObject Create();
 
     }

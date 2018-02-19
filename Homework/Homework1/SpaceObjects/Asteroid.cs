@@ -28,18 +28,18 @@ namespace Homework
         {
             position.X = position.X - Direction.X;
             image.RotateFlip(RotateFlipType.Rotate90FlipNone);
-            if (position.X < 0) Relocate(position.Y);
+            if (position.X < 0) Relocate();
         }
 
         public override void Relocate()
         {
-            position.X = Game.Width + size.Width;
+            position.X = Game.Width;
             position.Y = Game.randomizer.Next(0,Game.Height-size.Height);
         }
 
         public override void Relocate(int positionHeight)
         {
-            position.X = Game.Width + size.Width;
+            position.X = Game.Width;
             position.Y = positionHeight;
         }
     }

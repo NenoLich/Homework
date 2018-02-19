@@ -9,6 +9,8 @@ namespace Homework
 {
     class BulletFactory: SpaceObjectFactory
     {
+        private static List<Image> bulletImages;
+
         private const int SizeWidth = 40;
         private const int SizeHeight = 10;
 
