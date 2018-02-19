@@ -9,3 +9,7 @@
 INSTALLATION
 ------------
 Для корректной работы сборки пожалуйста воспользуйтесь файлом [Install.bat](https://github.com/NenoLich/Homework/blob/master/Install.bat)
+
+Additional Comments
+-------------------
+Класс Bullet находится в разработке, поэтому в проекте пока не представлен и не тестирован.
