@@ -14,10 +14,6 @@ namespace Homework
     /// </summary>
     class Bullet : SpaceObject
     {
-        /// <summary>
-        /// Скорость полета снаряда
-        /// </summary>
-        private static int speed = 3;
 
         public Bullet(Point position, Point direction, Size size) : base(position, direction, size)
         {
@@ -39,7 +35,7 @@ namespace Homework
                 this.Dispose();
             }
 
-            position.X = position.X + speed;
+            position.X = position.X + Direction.X;
         }
 
     }

@@ -22,7 +22,7 @@ namespace Homework
         protected Image image;
 
         bool disposed = false;
-        SafeHandle handle = new SafeFileHandle(IntPtr.Zero, true);
+        readonly SafeHandle handle = new SafeFileHandle(IntPtr.Zero, true);
 
         protected Point Direction
         {

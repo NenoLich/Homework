@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
@@ -20,6 +21,7 @@ namespace Homework
 
         private static BufferedGraphicsContext context;
         public static BufferedGraphics Buffer;
+        public static Starship player;
 
         /// <summary>
         /// Счетчик срабатываний метода Update, 
@@ -121,13 +123,17 @@ namespace Homework
         /// </summary>
         public static void Start()
         {
-            bullets=new List<Bullet>();
             screenSpaceController = new ScreenSpaceController(SpawnType.OnScreen);
 
-            List<string> imageList = Utility.GetFiles(@"Homework1\Stars", "*.jpeg|*.png").ToList();
+            AsteroidFactory.Init(@"Homework1\Asteroids");
+
+            StarshipFactory.Init(@"Homework1\Ships\ ");
+            BulletFactory.Init(@"Homework1\Bullets\ ");
+
+            List<Image> imageList = SpaceObjectFactory.ImagesLoad(@"Homework1\Stars");
 
             int iMax = imageList.Count;
-            imageList.AddRange(Utility.GetFiles(@"Homework1\StaticObjects", "*.jpeg|*.png"));
+            imageList.AddRange(SpaceObjectFactory.ImagesLoad(@"Homework1\StaticObjects"));
             if (imageList.Count == 0)
             {
                 throw new NullReferenceException("Файлы повреждены или отсутсвуют");
@@ -138,11 +144,11 @@ namespace Homework
             {
                 for (int i = 0; i < iMax; i++)
                 {
-                    spaceObjects.Add(new StarFactory(screenSpaceController, new Bitmap(imageList[i])).Create());
+                    spaceObjects.Add(new StarFactory(screenSpaceController,imageList[i]).Create());
                 }
 
                 for (int i = iMax; i < imageList.Count; i++)
-                    spaceObjects.Add(new StaticObjectFactory(screenSpaceController, new Bitmap(imageList[i])).Create());
+                    spaceObjects.Add(new StaticObjectFactory(screenSpaceController, imageList[i]).Create());
 
             }
             catch (GameObjectException)
