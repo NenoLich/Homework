@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
+using System.Media;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -15,7 +16,7 @@ namespace Homework
         /// <summary>
         /// Очки здоровья, игра заканчивается при их полном истощении
         /// </summary>
-        public int Hitpoints { get; private set; } = 25;
+        public int Hitpoints { get; private set; } = 150;
 
         public Point GunPoint { get; private set; }
 
@@ -65,11 +66,17 @@ namespace Homework
         public void GetDamage(Asteroid asteroid)
         {
             Hitpoints -= asteroid.Power;
+
+            if (Hitpoints<=0)
+            {
+                Hitpoints = 0;
+                Die();
+            }
         }
 
-        public void Die()
+        private void Die()
         {
-
+            Game.GameOver();
         }
     }
 }

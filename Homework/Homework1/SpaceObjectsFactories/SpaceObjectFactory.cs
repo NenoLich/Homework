@@ -14,6 +14,8 @@ namespace Homework
     /// </summary>
     abstract class SpaceObjectFactory
     {
+        private static string searchPattern= "*.jpg|*.jpeg|*.png";
+
         protected ScreenSpaceController screenSpaceController;
 
         protected int size;
@@ -41,7 +43,7 @@ namespace Homework
             List<Image> images = new List<Image>();
             try
             {
-                List<string> files = Utility.GetFiles(path, "*.jpeg|*.png");
+                List<string> files = Utility.GetFiles(path, searchPattern);
 
                 foreach (string file in files)
                 {

@@ -29,7 +29,7 @@ namespace Homework
             get => direction;
             set
             {
-                if (value.X<0 || value.X>50 || value.Y < 0 || value.Y > 50)
+                if (value.X<0 || value.X>80 || value.Y < 0 || value.Y > 80)
                 {
                     throw new GameObjectException($"Неправильные параметры {nameof(Direction)} обьекта {this.GetType()}");
                 }

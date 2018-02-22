@@ -17,7 +17,11 @@ namespace Homework
 
         public BulletFactory()
         {
-            image = bulletImages[Game.randomizer.Next(0, bulletImages.Count)];
+            if (bulletImages.Count>0)
+            {
+                image = bulletImages[Game.randomizer.Next(0, bulletImages.Count)];
+
+            }
         }
 
         public static void Init(string path)
@@ -25,8 +29,14 @@ namespace Homework
             bulletImages = ImagesLoad(path);
         }
 
-        public override SpaceObject Create() => 
-            new Bullet(Game.player.GunPoint, new Point(Speed, 0), new Size(SizeWidth, SizeHeight), image);
+        public override SpaceObject Create()
+        {
+            if (image is null)
+            {
+                return null;
+            }
 
+            return new Bullet(Game.player.GunPoint, new Point(Speed, 0), new Size(SizeWidth, SizeHeight), image);
+        }
     }
 }

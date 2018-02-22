@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
+using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -17,37 +19,33 @@ namespace Homework
     {
         #region Vars and Props
 
-        public static Random randomizer=new Random();
+        public static Random randomizer = new Random();
 
-        private static BufferedGraphicsContext context;
         public static BufferedGraphics Buffer;
         public static Starship player;
 
-        /// <summary>
-        /// Счетчик срабатываний метода Update, 
-        /// осуществляет замену конструкции с использованием дополнительных Timer'ов и методов Update
-        /// </summary>
-        private static int updateCount;
-
+        private static BufferedGraphicsContext context;
+        private static Timer updateTimer = new Timer { Interval = updateRate };
+        private static Timer spawnTimer = new Timer { Interval = spawnInterval };
         private static int width;
         private static int height;
-        private static List<Bullet> bullets;
         private static List<SpaceObject> spaceObjects;
+        private static List<Bullet> bullets = new List<Bullet>();
         private static ScreenSpaceController screenSpaceController;
         private static Overlay overlay;
 
         private const int updateRate = 100;         //Интервал срабатывания обновления состояния игры
-        private const int spawnInterval = 1000;     //Интервал создания новой партии астероидов
+        private const int spawnInterval=1000;     //Интервал создания новой партии астероидов
         private const int spawnCount = 5;           //Количество астероидов в партии
 
         // Свойства
         // Ширина и высота игрового поля
         public static int Width
         {
-            get=> width;
+            get => width;
             set
             {
-                if (value<0 || value>1000)
+                if (value < 0 || value > 1000)
                 {
                     throw new ArgumentOutOfRangeException($"Недопустимое значение ширины игрового поля {nameof(Form.Width)}");
                 }
@@ -90,7 +88,7 @@ namespace Homework
                 form.Close();
                 return false;
             }
-           
+
             // Графическое устройство для вывода графики
 
             // предоставляет доступ к главному буферу графического контекста для текущего приложения
@@ -99,11 +97,13 @@ namespace Homework
             // Связываем буфер в памяти с графическим объектом.
             // для того, чтобы рисовать в буфере
             Buffer = context.Allocate(graphics, new Rectangle(0, 0, Width, Height));
-            Timer timer = new Timer { Interval = updateRate };
-            timer.Start();
-            timer.Tick += Timer_Tick;
+            
+            updateTimer.Start();
+            updateTimer.Tick += Timer_Tick;
 
-            overlay=new Overlay(form);
+            form.KeyDown += Form_KeyDown;
+
+            overlay = new Overlay(form);
 
             return true;
         }
@@ -114,21 +114,68 @@ namespace Homework
             Update();
         }
 
+        private static void Form_KeyDown(object sender, KeyEventArgs e)
+        {
+            switch (e.KeyCode)
+            {
+                case Keys.ControlKey:
+                    bullets.Add((Bullet)new BulletFactory().Create());
+                    break;
+                case Keys.Up:
+                    player.MoveUp();
+                    break;
+                case Keys.Down:
+                    player.MoveDown();
+                    break;
+                case Keys.Left:
+                    player.MoveLeft();
+                    break;
+                case Keys.Right:
+                    player.MoveRight();
+                    break;
+            }
+        }
+
+
         #endregion
 
         #region Start
+
+        /// <summary>
+        /// Инициализация Фабрик
+        /// </summary>
+        public static void Init(GameMode gameMode)
+        {
+            screenSpaceController = new ScreenSpaceController(SpawnType.OnScreen);
+
+            AsteroidFactory.Init(@"Homework1\Asteroids");
+
+            string shipsPath=string.Empty;
+            string bulletsPath= string.Empty;
+
+            switch (gameMode)
+            {
+                case GameMode.Matches:
+                    shipsPath = @"Homework1\Ships\Matchboxes";
+                    bulletsPath = @"Homework1\Bullets\Matches";
+                    break;
+                case GameMode.Starships:
+                    shipsPath = @"Homework1\Ships\Starships";
+                    bulletsPath = @"Homework1\Bullets\Shells";
+                    break;
+            }
+            StarshipFactory.Init(shipsPath);
+            BulletFactory.Init(bulletsPath);
+
+            Start();
+        }
 
         /// <summary>
         /// Создание обьектов иерархии SpaceObject
         /// </summary>
         public static void Start()
         {
-            screenSpaceController = new ScreenSpaceController(SpawnType.OnScreen);
-
-            AsteroidFactory.Init(@"Homework1\Asteroids");
-
-            StarshipFactory.Init(@"Homework1\Ships\ ");
-            BulletFactory.Init(@"Homework1\Bullets\ ");
+            player = (Starship)new StarshipFactory().Create();
 
             List<Image> imageList = SpaceObjectFactory.ImagesLoad(@"Homework1\Stars");
 
@@ -144,7 +191,7 @@ namespace Homework
             {
                 for (int i = 0; i < iMax; i++)
                 {
-                    spaceObjects.Add(new StarFactory(screenSpaceController,imageList[i]).Create());
+                    spaceObjects.Add(new StarFactory(screenSpaceController, imageList[i]).Create());
                 }
 
                 for (int i = iMax; i < imageList.Count; i++)
@@ -153,26 +200,57 @@ namespace Homework
             }
             catch (GameObjectException)
             {
-                
+
             }
 
-            updateCount = 0;
+            Form.ActiveForm.Focus();
+
+            spawnTimer.Start();
+            spawnTimer.Tick += SpawnTimer_Tick;
+        }
+
+        /// <summary>
+        /// Добавление в коллекцию космических обьектов партии астероидов
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private static void SpawnTimer_Tick(object sender, EventArgs e)
+        {
+            ScreenSpaceController asteroidSpawnController = new ScreenSpaceController(SpawnType.OutOfScreen);
+            for (int i = 0; i < spawnCount; i++)
+            {
+                spaceObjects.Add(new AsteroidFactory(asteroidSpawnController).Create());
+            }
         }
 
         #endregion
 
         #region Update every 100ms
 
+        /// <summary>
+        /// Отображает обьекты на игровом поле, в обновленном состоянии
+        /// </summary>
         public static void Draw()
         {
             Buffer.Graphics.Clear(Color.Black);
 
-            if (spaceObjects !=null)
+            player?.Draw();
+
+            if (bullets != null)
+            {
+                foreach (Bullet obj in bullets)
+                    obj?.Draw();
+            }
+
+            if (spaceObjects != null)
             {
                 foreach (SpaceObject obj in spaceObjects)
                     obj?.Draw();
             }
-            
+
+            Buffer.Graphics.DrawString($"{player?.Hitpoints}", new Font("Franklin Gothic Medium", 80F, FontStyle.Bold,
+                GraphicsUnit.Point, ((byte)(204))), Brushes.White, 0, 0);
+
             try
             {
                 Buffer.Render();
@@ -182,15 +260,12 @@ namespace Homework
             }
         }
 
+        /// <summary>
+        /// Обновляет состояния SpaceObjects
+        /// </summary>
         public static void Update()
         {
-            
-            if (updateCount>=spawnInterval/updateRate)
-            {
-                SpawnAsteroids();
-
-                updateCount = 0;
-            }
+            player?.Update();
 
             if (bullets != null)
             {
@@ -203,25 +278,15 @@ namespace Homework
                 for (int i = 0; i < spaceObjects.Count; i++)
                 {
                     spaceObjects[i]?.Update();
-                    if (spaceObjects[i] != null && spaceObjects[i].HasCollider && bullets != null)
+                    if (spaceObjects[i] != null && spaceObjects[i].HasCollider && bullets != null && player!=null)
                     {
-                        i-=CheckCollision(spaceObjects[i]);
+                        if (CheckCollision(spaceObjects[i]))
+                        {
+                            spaceObjects[i].Dispose();
+                            spaceObjects.RemoveAt(i);
+                        }
                     }
                 }
-            }
-
-            updateCount++;
-        }
-
-        /// <summary>
-        /// Добавление в коллекцию космических обьектов партии астероидов
-        /// </summary>
-        private static void SpawnAsteroids()
-        {
-            ScreenSpaceController asteroidSpawnController = new ScreenSpaceController(SpawnType.OutOfScreen);
-            for (int i = 0; i < spawnCount; i++)
-            {
-                spaceObjects.Add(new AsteroidFactory(asteroidSpawnController).Create());
             }
         }
 
@@ -230,30 +295,42 @@ namespace Homework
         /// </summary>
         /// <param name="obj"></param>
         /// <returns></returns>
-        private static int CheckCollision(SpaceObject obj)
+        private static bool CheckCollision(SpaceObject obj)
         {
-            int collisions = 0;
+            if (player.Collide(obj))
+            {
+                System.Media.SystemSounds.Hand.Play();
+                player.GetDamage((Asteroid)obj);
+                return true;
+            }
+
             for (int i = 0; i < bullets.Count; i++)
             {
-                if (bullets[i]!=null && bullets[i].Collide(obj))
+                if (bullets[i] != null && bullets[i].Collide(obj))
                 {
-                    System.Media.SystemSounds.Hand.Play();
+                    System.Media.SystemSounds.Asterisk.Play();
                     bullets[i].Dispose();
                     bullets.RemoveAt(i);
                     i--;
-
-                    obj.Dispose();
-                    spaceObjects.Remove(obj);
-                    collisions++;
-                    //obj.Relocate();
-                    //Движение астероида
+                    return true;
                 }
             }
 
-            return collisions;
+            return false;
         }
 
         #endregion
+
+        public static void GameOver()
+        {
+            updateTimer.Stop();
+            spawnTimer.Stop();
+
+            Buffer.Graphics.DrawString("Game Over", new Font("Franklin Gothic Medium", 80F, FontStyle.Bold,
+                GraphicsUnit.Point, ((byte)(204))), Brushes.White, 100, 200);
+            overlay.DisplayMainMenuButton();
+            Buffer.Render();
+        }
     }
 }
 

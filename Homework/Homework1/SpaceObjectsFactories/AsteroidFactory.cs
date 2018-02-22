@@ -26,7 +26,11 @@ namespace Homework
         public AsteroidFactory(ScreenSpaceController screenSpaceController)
         {
             this.screenSpaceController = screenSpaceController;
-            image = asteroidImages[Game.randomizer.Next(0, asteroidImages.Count)];
+
+            if (asteroidImages.Count>0)
+            {
+                image = asteroidImages[Game.randomizer.Next(0, asteroidImages.Count)];
+            }
         }
 
         public static void Init(string path)
@@ -39,7 +43,7 @@ namespace Homework
             size = Game.randomizer.Next(minAsteroidSize, maxAsteroidSize);
 
             Point? legalPoint = screenSpaceController.GetLegalPoint(size);
-            if (legalPoint is null)
+            if (legalPoint is null || image is null)
             {
                 return null;
             }

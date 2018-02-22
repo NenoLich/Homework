@@ -13,7 +13,10 @@ namespace Homework
 
         public StarshipFactory()
         {
-            image = starshipImages[Game.randomizer.Next(0, starshipImages.Count)];
+            if (starshipImages.Count>0)
+            {
+                image = starshipImages[Game.randomizer.Next(0, starshipImages.Count)];
+            }
         }
 
         public static void Init(string path)
@@ -24,8 +27,11 @@ namespace Homework
         public override SpaceObject Create()
         {
             size = 80;
-
-            return new Starship(new Point(100,260), new Point(5,5), new Size(size, size), image);
+            if (image is null)
+            {
+                return null;
+            }
+            return new Starship(new Point(100,260), new Point(10,10), new Size(size, size), image);
         }
     }
 }

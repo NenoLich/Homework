@@ -24,6 +24,7 @@ namespace Homework
         public void Asteroids()
         {
             Form asteroidsForm = new Form ();
+            asteroidsForm.FormBorderStyle = FormBorderStyle.FixedDialog;
             asteroidsForm.Width = 800;
             asteroidsForm.Height = 600;
             if (Game.Awake(asteroidsForm))
