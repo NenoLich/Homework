@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.Drawing;
 using System.IO;
 using System.Linq;
+using System.Media;
 using System.Runtime.CompilerServices;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
@@ -22,8 +23,8 @@ namespace Homework
         public static Random randomizer = new Random();
 
         public static BufferedGraphics Buffer;
-        public static Starship player;
 
+        private static Starship player;
         private static BufferedGraphicsContext context;
         private static Timer updateTimer = new Timer { Interval = updateRate };
         private static Timer spawnTimer = new Timer { Interval = spawnInterval };
@@ -33,6 +34,8 @@ namespace Homework
         private static List<Bullet> bullets = new List<Bullet>();
         private static ScreenSpaceController screenSpaceController;
         private static Overlay overlay;
+        private static SoundPlayer asteroidHitPlayer;
+        private static SoundPlayer bulletHitPlayer;
 
         private const int updateRate = 100;         //Интервал срабатывания обновления состояния игры
         private const int spawnInterval=1000;     //Интервал создания новой партии астероидов
@@ -119,7 +122,7 @@ namespace Homework
             switch (e.KeyCode)
             {
                 case Keys.ControlKey:
-                    bullets.Add((Bullet)new BulletFactory().Create());
+                    bullets.Add((Bullet)new BulletFactory(player).Create());
                     break;
                 case Keys.Up:
                     player.MoveUp();
@@ -167,6 +170,9 @@ namespace Homework
             StarshipFactory.Init(shipsPath);
             BulletFactory.Init(bulletsPath);
 
+            asteroidHitPlayer = new SoundPlayer(@"Homework1\ShipExplosion.wav");
+            bulletHitPlayer = new SoundPlayer(@"Homework1\AsretoidExplosion.wav");
+            
             Start();
         }
 
@@ -176,6 +182,7 @@ namespace Homework
         public static void Start()
         {
             player = (Starship)new StarshipFactory().Create();
+            overlay.CreateHpBar();
 
             List<Image> imageList = SpaceObjectFactory.ImagesLoad(@"Homework1\Stars");
 
@@ -203,7 +210,7 @@ namespace Homework
 
             }
 
-            Form.ActiveForm.Focus();
+            Form.ActiveForm?.Focus();
 
             spawnTimer.Start();
             spawnTimer.Tick += SpawnTimer_Tick;
@@ -234,8 +241,6 @@ namespace Homework
         {
             Buffer.Graphics.Clear(Color.Black);
 
-            player?.Draw();
-
             if (bullets != null)
             {
                 foreach (Bullet obj in bullets)
@@ -248,8 +253,7 @@ namespace Homework
                     obj?.Draw();
             }
 
-            Buffer.Graphics.DrawString($"{player?.Hitpoints}", new Font("Franklin Gothic Medium", 80F, FontStyle.Bold,
-                GraphicsUnit.Point, ((byte)(204))), Brushes.White, 0, 0);
+            player?.Draw();
 
             try
             {
@@ -266,6 +270,7 @@ namespace Homework
         public static void Update()
         {
             player?.Update();
+            overlay?.UpdateHpBar(player?.HpBarPoint,player?.Hitpoints);
 
             if (bullets != null)
             {
@@ -299,7 +304,7 @@ namespace Homework
         {
             if (player.Collide(obj))
             {
-                System.Media.SystemSounds.Hand.Play();
+                asteroidHitPlayer.Play();
                 player.GetDamage((Asteroid)obj);
                 return true;
             }
@@ -308,7 +313,8 @@ namespace Homework
             {
                 if (bullets[i] != null && bullets[i].Collide(obj))
                 {
-                    System.Media.SystemSounds.Asterisk.Play();
+                    bulletHitPlayer.Play();
+
                     bullets[i].Dispose();
                     bullets.RemoveAt(i);
                     i--;
@@ -326,10 +332,18 @@ namespace Homework
             updateTimer.Stop();
             spawnTimer.Stop();
 
+            overlay.UpdateHpBar(player?.HpBarPoint, player?.Hitpoints);
             Buffer.Graphics.DrawString("Game Over", new Font("Franklin Gothic Medium", 80F, FontStyle.Bold,
-                GraphicsUnit.Point, ((byte)(204))), Brushes.White, 100, 200);
+                GraphicsUnit.Point, ((byte)(204))), Brushes.Red, 100, 200);
             overlay.DisplayMainMenuButton();
-            Buffer.Render();
+
+            try
+            {
+                Buffer.Render();
+            }
+            catch (ArgumentException)
+            {
+            }
         }
     }
 }

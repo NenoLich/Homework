@@ -18,23 +18,42 @@ namespace Homework
         /// </summary>
         public int Hitpoints { get; private set; } = 150;
 
+        /// <summary>
+        /// Точка для отрисовки полоски очков здоровья
+        /// </summary>
+        public Point HpBarPoint { get; private  set; }
+
+        /// <summary>
+        /// Точка для инстанцирования выпущенных снарядов
+        /// </summary>
         public Point GunPoint { get; private set; }
+
+        /// <summary>
+        /// Расстояние между Spaceship и его полоской очков здоровья
+        /// </summary>
+        private const int hpBarOffset = 20;
 
         public Starship(Point position, Point direction, Size size) : base(position, direction, size)
         {
             HasCollider = true;
-            GunPoint = new Point(position.X + size.Width, position.Y + size.Height / 2);
+            UpdateProperties();
         }
 
         public Starship(Point position, Point direction, Size size, Image image) : base(position, direction, size, image)
         {
             HasCollider = true;
-            GunPoint = new Point(position.X + size.Width, position.Y + size.Height / 2);
+            UpdateProperties();
         }
 
         public override void Update()
         {
+            UpdateProperties();
+        }
+
+        private void UpdateProperties()
+        {
             GunPoint = new Point(position.X + size.Width, position.Y + size.Height / 2);
+            HpBarPoint = new Point(position.X, position.Y + size.Height + hpBarOffset);
         }
 
         #region Motion
@@ -63,6 +82,10 @@ namespace Homework
 
         #endregion
 
+        /// <summary>
+        /// Срабатывает при столкновении с астероидом
+        /// </summary>
+        /// <param name="asteroid"></param>
         public void GetDamage(Asteroid asteroid)
         {
             Hitpoints -= asteroid.Power;
@@ -74,6 +97,9 @@ namespace Homework
             }
         }
 
+        /// <summary>
+        /// Крушение корабля
+        /// </summary>
         private void Die()
         {
             Game.GameOver();

@@ -20,6 +20,7 @@ namespace Homework
         private Panel mainMenu;
         private Panel gameModeMenu;
         private Panel optionsMenu;
+        private ProgressBar hpBar;
         private Button mainMenuButton;
 
         private const string matchboxPath = @"Homework1\Ships\Matchboxes\Matchbox.jpg";
@@ -265,7 +266,7 @@ namespace Homework
 
         private void volumeTrackBar_Scroll(object sender, EventArgs e)
         {
-            //
+            Utility.waveOutSetVolume(0, (uint)(Convert.ToDouble(0xFFFF0000) * ((TrackBar)sender).Value / ((TrackBar)sender).Maximum));
         }
 
         private void back_button_Click(object sender, EventArgs e)
@@ -282,6 +283,43 @@ namespace Homework
             button.Parent.Visible = false;
         }
 
+        #region HPBar
+
+        /// <summary>
+        /// Полоска отображения очков здоровья игрока
+        /// </summary>
+        public void CreateHpBar()
+        {
+            hpBar = new ProgressBar
+            {
+                Maximum = 150,
+                Size = new Size(80, 8),
+                Step = 1,
+                Style = ProgressBarStyle.Continuous,
+            };
+
+
+            //hpBar.DataBindings.Add("Value",Game.player, "Hitpoints");
+            //hpBar.DataBindings.Add("Location", Game.player, "HpBarPoint");
+
+            form.Controls.Add(hpBar);
+        }
+
+        /// <summary>
+        /// Обновление значения и позиции полоски очков здоровья на экране
+        /// </summary>
+        /// <param name="location"></param>
+        /// <param name="value"></param>
+        public void UpdateHpBar(Point? location, int? value)
+        {
+            if (hpBar!=null)
+            {
+                hpBar.Location = location ?? new Point(-100, -100);
+                hpBar.Value = value ?? 0;
+            }
+        }
+
+        #endregion
 
         /// <summary>
         /// Создание кнопки ссылающейся на главное меню

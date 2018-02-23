@@ -31,7 +31,7 @@ namespace Homework
             {
                 return null;
             }
-            return new Starship(new Point(100,260), new Point(10,10), new Size(size, size), image);
+            return new Starship(new Point(100,260), new Point(10,10), new Size(size, size*7/10), image);
         }
     }
 }

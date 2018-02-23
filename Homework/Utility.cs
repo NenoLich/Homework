@@ -19,6 +19,12 @@ namespace Homework
         [DllImport("user32.dll")]
         static extern bool ShowWindow(IntPtr hWnd, int nCmdShow);
 
+        [DllImport("winmm.dll", SetLastError = true, CharSet = CharSet.Auto)]
+        public static extern uint waveOutGetVolume(uint hwo, ref uint dwVolume);
+
+        [DllImport("winmm.dll", SetLastError = true, CallingConvention = CallingConvention.Winapi)]
+        public static extern int waveOutSetVolume(uint uDeviceID, uint dwVolume);
+
         const int SwHide = 0;
         const int SwShow = 5;
 
