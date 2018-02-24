@@ -22,17 +22,19 @@ namespace Homework
         private Panel optionsMenu;
         private ProgressBar hpBar;
         private Button mainMenuButton;
-
+        private Action MusicStop;
+        
         private const string matchboxPath = @"Homework1\Ships\Matchboxes\Matchbox.jpg";
         private const string starshipPath = @"Homework1\Ships\Starships\Starship.jpg";
         
-        public Overlay(Form form)
+        public Overlay(Form form, Action musicStop)
         {
             this.form = form;
             CreateMainMenu();
             CreateGameModeMenu();
             CreateOptionsMenu();
             CreateMainMenuButton();
+            MusicStop = musicStop;
         }
 
         #endregion
@@ -89,6 +91,16 @@ namespace Homework
                 Size = new Size(98, 25),
                 TextImageRelation = TextImageRelation.ImageBeforeText,
                 UseVisualStyleBackColor = true
+            };
+        }
+
+        private TrackBar CreateTrackBarTemplate()
+        {
+            return new TrackBar
+            {
+                AutoSize=false,
+                Value = 10,
+                Size = new Size(140, 25),
             };
         }
 
@@ -243,30 +255,51 @@ namespace Homework
 
         private void CreateSoundOptions()
         {
-            Label volumeLabel = new Label
+            Label soundVolumeLabel = new Label
             {
                 AutoSize = true,
-                Font = new Font("Franklin Gothic Medium", 12F, FontStyle.Regular,
+                Font = new Font("Franklin Gothic Medium", 9.75F, FontStyle.Regular,
                     GraphicsUnit.Point, ((byte) (204))),
-                Location = new Point(105, 150),
-                Size = new Size(140, 40),
-                Text="Volume"
+                Location = new Point(105, 114),
+                Size = new Size(88, 17),
+                Text="Sound Volume"
             };
-            optionsMenu.Controls.Add(volumeLabel);
+            optionsMenu.Controls.Add(soundVolumeLabel);
 
-            TrackBar volumeTrackBar = new TrackBar
+            TrackBar soundTrackBar = CreateTrackBarTemplate();
+            soundTrackBar.Location = new Point(80, 140);
+
+            soundTrackBar.Scroll += soundTrackBar_Scroll;
+            optionsMenu.Controls.Add(soundTrackBar);
+
+            Label musicVolumeLabel = new Label
             {
-                Value = 10,
-                Size = new Size(140, 40),
-                Location = new Point(80, 210)
+                AutoSize = true,
+                Font = new Font("Franklin Gothic Medium", 9.75F, FontStyle.Regular,
+                    GraphicsUnit.Point, ((byte)(204))),
+                Location = new Point(105, 202),
+                Size = new Size(88, 17),
+                Text = "Music Volume"
             };
-            volumeTrackBar.Scroll += volumeTrackBar_Scroll;
-            optionsMenu.Controls.Add(volumeTrackBar);
+            optionsMenu.Controls.Add(musicVolumeLabel);
+
+            TrackBar musicTrackBar = CreateTrackBarTemplate();
+            musicTrackBar.Location = new Point(80, 229);
+
+            musicTrackBar.Scroll += musicTrackBar_Scroll;
+            optionsMenu.Controls.Add(musicTrackBar);
         }
 
-        private void volumeTrackBar_Scroll(object sender, EventArgs e)
+        private void soundTrackBar_Scroll(object sender, EventArgs e)
         {
-            Utility.waveOutSetVolume(0, (uint)(Convert.ToDouble(0xFFFF0000) * ((TrackBar)sender).Value / ((TrackBar)sender).Maximum));
+            Game.SetSoundVolumeLevel(0.5d*((TrackBar)sender).Value/ ((TrackBar)sender).Maximum);
+           //Utility.waveOutSetVolume(0, (uint)(Convert.ToDouble(0xFFFF0000) * ((TrackBar)sender).Value / ((TrackBar)sender).Maximum));
+        }
+
+        private void musicTrackBar_Scroll(object sender, EventArgs e)
+        {
+            Game.SetMusicVolumeLevel(0.5d * ((TrackBar)sender).Value / ((TrackBar)sender).Maximum);
+            //Utility.waveOutSetVolume(0, (uint)(Convert.ToDouble(0xFFFF0000) * ((TrackBar)sender).Value / ((TrackBar)sender).Maximum));
         }
 
         private void back_button_Click(object sender, EventArgs e)
@@ -339,6 +372,7 @@ namespace Homework
 
         private void mainMenuButton_Click(object sender, EventArgs e)
         {
+            MusicStop();
             ((Button)sender).Visible = false;
             mainMenu.Visible = true;
         }

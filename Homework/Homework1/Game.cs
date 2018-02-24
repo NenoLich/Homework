@@ -10,6 +10,9 @@ using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using System.Windows.Media;
+using Brushes = System.Drawing.Brushes;
+using Color = System.Drawing.Color;
 
 namespace Homework
 {
@@ -34,8 +37,9 @@ namespace Homework
         private static List<Bullet> bullets = new List<Bullet>();
         private static ScreenSpaceController screenSpaceController;
         private static Overlay overlay;
-        private static SoundPlayer asteroidHitPlayer;
-        private static SoundPlayer bulletHitPlayer;
+        private static MediaPlayer asteroidHitPlayer=new MediaPlayer();
+        private static MediaPlayer bulletHitPlayer=new MediaPlayer();
+        private static MediaPlayer musicPlayer=new MediaPlayer();
 
         private const int updateRate = 100;         //Интервал срабатывания обновления состояния игры
         private const int spawnInterval=1000;     //Интервал создания новой партии астероидов
@@ -106,7 +110,7 @@ namespace Homework
 
             form.KeyDown += Form_KeyDown;
 
-            overlay = new Overlay(form);
+            overlay = new Overlay(form, () => musicPlayer?.Stop());
 
             return true;
         }
@@ -170,10 +174,28 @@ namespace Homework
             StarshipFactory.Init(shipsPath);
             BulletFactory.Init(bulletsPath);
 
-            asteroidHitPlayer = new SoundPlayer(@"Homework1\ShipExplosion.wav");
-            bulletHitPlayer = new SoundPlayer(@"Homework1\AsretoidExplosion.wav");
+            asteroidHitPlayer.Open(new Uri(@"Homework1\Sound\ShipExplosion.wav",UriKind.Relative));
+            bulletHitPlayer.Open(new Uri(@"Homework1\Sound\AsretoidExplosion.wav", UriKind.Relative));
+            musicPlayer.Open(new Uri(@"Homework1\Sound\Music.wav", UriKind.Relative));
+            musicPlayer.MediaEnded += Media_Ended;
             
             Start();
+        }
+
+        public static void SetSoundVolumeLevel(double volume)
+        {
+            asteroidHitPlayer.Volume = volume;
+            bulletHitPlayer.Volume = volume;
+        }
+
+        public static void SetMusicVolumeLevel(double volume)
+        {
+            musicPlayer.Volume = volume;
+        }
+
+        private static void Media_Ended(object sender,EventArgs e)
+        {
+            musicPlayer.Position=TimeSpan.Zero;
         }
 
         /// <summary>
@@ -181,7 +203,7 @@ namespace Homework
         /// </summary>
         public static void Start()
         {
-            player = (Starship)new StarshipFactory().Create();
+            player = (Starship) new StarshipFactory().Create();
             overlay.CreateHpBar();
 
             List<Image> imageList = SpaceObjectFactory.ImagesLoad(@"Homework1\Stars");
@@ -214,6 +236,8 @@ namespace Homework
 
             spawnTimer.Start();
             spawnTimer.Tick += SpawnTimer_Tick;
+
+            musicPlayer.Play();
         }
 
         /// <summary>
@@ -304,6 +328,7 @@ namespace Homework
         {
             if (player.Collide(obj))
             {
+                asteroidHitPlayer.Stop();
                 asteroidHitPlayer.Play();
                 player.GetDamage((Asteroid)obj);
                 return true;
@@ -313,6 +338,7 @@ namespace Homework
             {
                 if (bullets[i] != null && bullets[i].Collide(obj))
                 {
+                    bulletHitPlayer.Stop();
                     bulletHitPlayer.Play();
 
                     bullets[i].Dispose();
