@@ -13,21 +13,14 @@ namespace Homework
     /// </summary>
     class Asteroid: SpaceObject
     {
-        /// <summary>
-        /// Эквивалентно нанесенному урону при столкновении
-        /// </summary>
-        public readonly int Power;
-
         public Asteroid(Point position, Point direction, Size size) : base(position, direction, size)
         {
             HasCollider = true;
-            Power = size.Height * size.Width / 100;
         }
 
         public Asteroid(Point position, Point direction, Size size, Image image) : base(position, direction, size, image)
         {
             HasCollider = true;
-            Power = size.Height * size.Width / 100;
         }
 
         /// <summary>

@@ -51,6 +51,7 @@
     <Compile Include="Homework1\GameObjectException.cs" />
     <Compile Include="Homework1\SpaceObjectsFactories\AsteroidFactory.cs" />
     <Compile Include="Homework1\SpaceObjectsFactories\StarshipFactory.cs" />
+    <Compile Include="Homework1\SpaceObjectsFactories\MedicKitFactory.cs" />
     <Compile Include="Homework1\SpaceObjects\Asteroid.cs" />
     <Compile Include="Homework1\SpaceObjects\Bullet.cs" />
     <Compile Include="Homework1\SpaceObjectsFactories\BulletFactory.cs" />
@@ -63,6 +64,7 @@
     <Compile Include="Homework1\SpaceObjects\Star.cs" />
     <Compile Include="Homework1\SpaceObjectsFactories\StarFactory.cs" />
     <Compile Include="Homework1\SpaceObjects\Starship.cs" />
+    <Compile Include="Homework1\SpaceObjects\MedicKit.cs" />
     <Compile Include="Homework1\SpaceObjects\StaticObject.cs" />
     <Compile Include="Homework1\SpaceObjectsFactories\StaticObjectFactory.cs" />
     <Compile Include="Homework1\SpawnType.cs" />

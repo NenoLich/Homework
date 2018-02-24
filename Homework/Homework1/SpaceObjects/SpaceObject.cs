@@ -14,6 +14,13 @@ namespace Homework
     /// </summary>
     abstract class SpaceObject: ICollidable, IDisposable
     {
+        #region Vars and Props
+
+        /// <summary>
+        /// Эквивалентно нанесенному урону или восстановленному здоровью при столкновении
+        /// </summary>
+        public readonly int Power;
+
         public bool HasCollider;
 
         protected Point position;
@@ -21,8 +28,9 @@ namespace Homework
         protected Size size;
         protected Image image;
 
-        bool disposed = false;
         readonly SafeHandle handle = new SafeFileHandle(IntPtr.Zero, true);
+
+        public bool Disposed { get; private set; } = false;
 
         protected Point Direction
         {
@@ -38,11 +46,16 @@ namespace Homework
             }
         }
 
+        #endregion
+
+        #region Ctors
+
         public SpaceObject(Point position, Point direction, Size size)
         {
             this.position = position;
             Direction = direction;
             this.size = size;
+            Power = size.Height * size.Width / 100;
         }
         public SpaceObject(Point position, Point direction, Size size, Image image)
         {
@@ -50,14 +63,19 @@ namespace Homework
             Direction = direction;
             this.size = size;
             this.image = image;
-
+            Power = size.Height * size.Width / 100;
         }
+
+        #endregion
+
+        #region Methods
+
+        public abstract void Update();
+
         public virtual void Draw()
         {
             Game.Buffer.Graphics.DrawImage(image, position.X, position.Y, size.Width, size.Height);
         }
-
-        public abstract void Update();
 
         public virtual void Relocate()
         {
@@ -66,6 +84,8 @@ namespace Homework
         public virtual void Relocate(int positionHeight)
         {
         }
+        
+        #endregion
 
         #region ICollidable implementation
 
@@ -88,7 +108,7 @@ namespace Homework
 
         protected virtual void Dispose(bool disposing)
         {
-            if (disposed)
+            if (Disposed)
                 return;
 
             if (disposing)
@@ -96,7 +116,7 @@ namespace Homework
                 handle.Dispose();
             }
 
-            disposed = true;
+            Disposed = true;
         }
 
         #endregion

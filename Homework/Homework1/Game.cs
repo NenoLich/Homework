@@ -121,6 +121,11 @@ namespace Homework
             Update();
         }
 
+        /// <summary>
+        /// Управление с помощью клавиатуры
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private static void Form_KeyDown(object sender, KeyEventArgs e)
         {
             switch (e.KeyCode)
@@ -149,13 +154,14 @@ namespace Homework
         #region Start
 
         /// <summary>
-        /// Инициализация Фабрик
+        /// Инициализация Фабрик и звуковой составляющей
         /// </summary>
         public static void Init(GameMode gameMode)
         {
             screenSpaceController = new ScreenSpaceController(SpawnType.OnScreen);
 
             AsteroidFactory.Init(@"Homework1\Asteroids");
+            MedicKitFactory.Init(@"Homework1\MedicKits");
 
             string shipsPath=string.Empty;
             string bulletsPath= string.Empty;
@@ -182,17 +188,30 @@ namespace Homework
             Start();
         }
 
+        /// <summary>
+        /// Регуляция уровня звуковых эффектов
+        /// </summary>
+        /// <param name="volume"></param>
         public static void SetSoundVolumeLevel(double volume)
         {
             asteroidHitPlayer.Volume = volume;
             bulletHitPlayer.Volume = volume;
         }
 
+        /// <summary>
+        /// Регуляция уровня музыки
+        /// </summary>
+        /// <param name="volume"></param>
         public static void SetMusicVolumeLevel(double volume)
         {
             musicPlayer.Volume = volume;
         }
 
+        /// <summary>
+        /// Повторное воспроизведение композиции
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private static void Media_Ended(object sender,EventArgs e)
         {
             musicPlayer.Position=TimeSpan.Zero;
@@ -226,6 +245,7 @@ namespace Homework
                 for (int i = iMax; i < imageList.Count; i++)
                     spaceObjects.Add(new StaticObjectFactory(screenSpaceController, imageList[i]).Create());
 
+                RemoveNullsOrDisposed(spaceObjects);
             }
             catch (GameObjectException)
             {
@@ -241,16 +261,37 @@ namespace Homework
         }
 
         /// <summary>
-        /// Добавление в коллекцию космических обьектов партии астероидов
+        /// Добавление в коллекцию космических обьектов аптечек и астероидов
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
         private static void SpawnTimer_Tick(object sender, EventArgs e)
         {
+            MedicKitHandle();
+
             ScreenSpaceController asteroidSpawnController = new ScreenSpaceController(SpawnType.OutOfScreen);
             for (int i = 0; i < spawnCount; i++)
             {
                 spaceObjects.Add(new AsteroidFactory(asteroidSpawnController).Create());
+            }
+
+            RemoveNullsOrDisposed(spaceObjects);
+        }
+
+        /// <summary>
+        /// Создает аптечку на игровом поле при отсутствии таковых 
+        /// </summary>
+        private static void MedicKitHandle()
+        {
+            int indexOfLastColliderless = spaceObjects.FindLastIndex(x=>x!=null && !x.HasCollider);
+            if (indexOfLastColliderless == spaceObjects.Count-1)
+            {
+                spaceObjects.Add(new MedicKitFactory(screenSpaceController).Create());
+            }
+
+            if (spaceObjects[indexOfLastColliderless+1] is Asteroid)
+            {
+                spaceObjects.Insert(indexOfLastColliderless+1, new MedicKitFactory(screenSpaceController).Create());
             }
         }
 
@@ -307,20 +348,22 @@ namespace Homework
                 for (int i = 0; i < spaceObjects.Count; i++)
                 {
                     spaceObjects[i]?.Update();
-                    if (spaceObjects[i] != null && spaceObjects[i].HasCollider && bullets != null && player!=null)
+                    if (spaceObjects[i] != null && spaceObjects[i].HasCollider && bullets != null && player != null)
                     {
                         if (CheckCollision(spaceObjects[i]))
                         {
                             spaceObjects[i].Dispose();
-                            spaceObjects.RemoveAt(i);
                         }
                     }
                 }
+
+                RemoveNullsOrDisposed(spaceObjects);
+                RemoveNullsOrDisposed(bullets);
             }
         }
 
         /// <summary>
-        /// Проверка попадания снаряда по астероиду и их последующее взаимоуничтожение
+        /// Проверка столкновений SpaceObjects
         /// </summary>
         /// <param name="obj"></param>
         /// <returns></returns>
@@ -330,7 +373,7 @@ namespace Homework
             {
                 asteroidHitPlayer.Stop();
                 asteroidHitPlayer.Play();
-                player.GetDamage((Asteroid)obj);
+                player.GetDamageOrHeal(obj);
                 return true;
             }
 
@@ -342,8 +385,6 @@ namespace Homework
                     bulletHitPlayer.Play();
 
                     bullets[i].Dispose();
-                    bullets.RemoveAt(i);
-                    i--;
                     return true;
                 }
             }
@@ -351,8 +392,27 @@ namespace Homework
             return false;
         }
 
+        /// <summary>
+        /// Удаляет лишние элементы из коллекции spaceObjects
+        /// </summary>
+        private static void RemoveNullsOrDisposed<T>(List<T> objects) where T: SpaceObject
+        {
+            for (int i = 0; i < objects.Count; i++)
+            {
+                if (objects[i] is null || objects[i].Disposed)
+                {
+                    objects.RemoveAt(i--);
+                }
+            }
+        }
+
         #endregion
 
+        #region EndOfTheGame
+
+        /// <summary>
+        /// Окончание игры
+        /// </summary>
         public static void GameOver()
         {
             updateTimer.Stop();
@@ -371,6 +431,8 @@ namespace Homework
             {
             }
         }
+
+        #endregion
     }
 }
 

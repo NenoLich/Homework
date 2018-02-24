@@ -166,6 +166,12 @@ namespace Homework
             gameModeMenu.Visible = true;
         }
 
+        private void ParentPanelHide(object sender)
+        {
+            Button button = sender as Button;
+            button.Parent.Visible = false;
+        }
+
         #endregion
 
         /// <summary>
@@ -309,12 +315,6 @@ namespace Homework
         }
 
         #endregion
-
-        private void ParentPanelHide(object sender)
-        {
-            Button button = sender as Button;
-            button.Parent.Visible = false;
-        }
 
         #region HPBar
 

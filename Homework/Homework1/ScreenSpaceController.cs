@@ -20,18 +20,20 @@ namespace Homework
         /// </summary>
         public Dictionary<Point, bool> freeSqreenSpace;
 
-        private SpawnType spawnType;
+        private SpawnType SpawnType;
         private static Random randomize = new Random();
 
         public ScreenSpaceController(SpawnType spawnType)
         {
-            this.spawnType = spawnType;
+            SpawnType = spawnType;
 
-            switch (this.spawnType)
+            switch (SpawnType)
             {
                 case SpawnType.OnScreen:
+                case SpawnType.AnywhereOnscreen:
                     freeSqreenSpace = FillPointList(new Point(0, 0), Game.Width, Game.Height).ToDictionary(x => x, x => true);
                     break;
+
                 case SpawnType.OutOfScreen:
                     freeSqreenSpace = FillPointList(new Point(Game.Width, 0), 0, Game.Height).ToDictionary(x => x, x => true);
                     break;
@@ -58,11 +60,15 @@ namespace Homework
             List<Point> imagePoints = new List<Point>(size * size);
             Point leftTopImagePoint=new Point(); 
 
-            switch (spawnType)
+            switch (SpawnType)
             {
                 case SpawnType.OnScreen:
                     leftTopImagePoint = new Point(randomize.Next(0, Game.Width - size), randomize.Next(0, Game.Height - size));
                     break;
+
+                case SpawnType.AnywhereOnscreen:
+                    return new Point(randomize.Next(0, Game.Width - size), randomize.Next(0, Game.Height - size));
+
                 case SpawnType.OutOfScreen:
                     leftTopImagePoint = new Point(Game.Width, randomize.Next(0, Game.Height - size));
                     break;
@@ -77,6 +83,40 @@ namespace Homework
 
             return null;
         }
+
+        /// <summary>
+        /// Создание точки для расположения изображения на экране
+        /// </summary>
+        /// <returns></returns>
+        public virtual Point? GetLegalPoint(int size, SpawnType spawnType)
+        {
+            List<Point> imagePoints = new List<Point>(size * size);
+            Point leftTopImagePoint = new Point();
+
+            switch (spawnType)
+            {
+                case SpawnType.OnScreen:
+                    leftTopImagePoint = new Point(randomize.Next(0, Game.Width - size), randomize.Next(0, Game.Height - size));
+                    break;
+
+                case SpawnType.AnywhereOnscreen:
+                    return new Point(randomize.Next(0, Game.Width - size), randomize.Next(0, Game.Height - size));
+
+                case SpawnType.OutOfScreen:
+                    leftTopImagePoint = new Point(Game.Width, randomize.Next(0, Game.Height - size));
+                    break;
+            }
+
+            imagePoints.AddRange(FillPointList(leftTopImagePoint, size, size));
+            if (HasAvailableSpace(imagePoints))
+            {
+                ReserveSpace(imagePoints);
+                return leftTopImagePoint;
+            }
+
+            return null;
+        }
+
 
         /// <summary>
         /// Проверка точки на "занятость" другим обьектом

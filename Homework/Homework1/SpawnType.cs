@@ -12,6 +12,7 @@ namespace Homework
     public enum SpawnType
     {
         OnScreen,
+        AnywhereOnscreen,
         OutOfScreen
     }
 }

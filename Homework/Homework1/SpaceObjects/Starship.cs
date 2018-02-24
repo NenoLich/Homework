@@ -16,7 +16,7 @@ namespace Homework
         /// <summary>
         /// Очки здоровья, игра заканчивается при их полном истощении
         /// </summary>
-        public int Hitpoints { get; private set; } = 150;
+        public int Hitpoints { get; private set; } = maxHitpoints;
 
         /// <summary>
         /// Точка для отрисовки полоски очков здоровья
@@ -32,6 +32,8 @@ namespace Homework
         /// Расстояние между Spaceship и его полоской очков здоровья
         /// </summary>
         private const int hpBarOffset = 20;
+
+        private const int maxHitpoints = 150;
 
         public Starship(Point position, Point direction, Size size) : base(position, direction, size)
         {
@@ -82,18 +84,32 @@ namespace Homework
 
         #endregion
 
-        /// <summary>
-        /// Срабатывает при столкновении с астероидом
-        /// </summary>
-        /// <param name="asteroid"></param>
-        public void GetDamage(Asteroid asteroid)
-        {
-            Hitpoints -= asteroid.Power;
+        #region Interaction
 
-            if (Hitpoints<=0)
+        /// <summary>
+        /// Срабатывает при столкновении с астероидом или аптечкой
+        /// </summary>
+        /// <param name="spaceObject"></param>
+        public void GetDamageOrHeal(SpaceObject spaceObject)
+        {
+            if (spaceObject is Asteroid)
             {
-                Hitpoints = 0;
-                Die();
+                Hitpoints -= spaceObject.Power;
+
+                if (Hitpoints <= 0)
+                {
+                    Hitpoints = 0;
+                    Die();
+                }
+            }
+
+            if (spaceObject is MedicKit)
+            {
+                Hitpoints += spaceObject.Power;
+                if (Hitpoints > maxHitpoints)
+                {
+                    Hitpoints = maxHitpoints;
+                }
             }
         }
 
@@ -104,5 +120,8 @@ namespace Homework
         {
             Game.GameOver();
         }
+
+        #endregion
+
     }
 }
