@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.IO;
 using System.Linq;
 using System.Media;
 using System.Text;
@@ -37,10 +38,11 @@ namespace Homework
         private const int maxSpeed = 1000;
         private const int minStep = 10;
         private const int maxStep = 50;
-        private const string matchboxPath = @"Homework1\Ships\Matchboxes\Matchbox.jpg";
-        private const string starshipPath = @"Homework1\Ships\Starships\Starship.jpg";
-        private const string previousButtonPath = @"Homework1\Buttons\Previous.jpg";
-        private const string nextButtonPath = @"Homework1\Buttons\Next.jpg";
+
+        private readonly string matchboxPath = Path.Combine(Game.resourcesPath, @"Resources\Ships\Matchboxes\Matchbox.jpg");
+        private readonly string starshipPath = Path.Combine(Game.resourcesPath, @"Resources\Ships\Starships\Starship.jpg");
+        private readonly string previousButtonPath = Path.Combine(Game.resourcesPath, @"Resources\Buttons\Previous.jpg");
+        private readonly string nextButtonPath = Path.Combine(Game.resourcesPath, @"Resources\Buttons\Next.jpg");
 
         public Overlay(Form form, Action<int> changeSpeed, Action musicStop)
         {
@@ -165,13 +167,12 @@ namespace Homework
             mainMenu.Location = new Point(250, 100);
             form.Controls.Add(mainMenu);
             form.AcceptButton = newGame_button;
-            form.CancelButton = exit_button;
         }
 
         private void exit_button_Click(object sender, EventArgs e)
         {
-            Button button = sender as Button;
-            button.FindForm().Close();
+            MusicStop();
+            ((Button)sender).FindForm()?.Close();
         }
 
         private void options_button_Click(object sender, EventArgs e)
@@ -188,8 +189,7 @@ namespace Homework
 
         private void ParentPanelHide(object sender)
         {
-            Button button = sender as Button;
-            button.Parent.Visible = false;
+            ((Button)sender).Parent.Visible = false;
         }
 
         #endregion
@@ -216,8 +216,8 @@ namespace Homework
             resumeGame_button.Visible = false;
             newGame_button.Visible = true;
 
-            hpBar.Visible = true;
             Game.Resume();
+            hpBar.Visible = true;
         }
 
         public void DisplayPauseMenu()

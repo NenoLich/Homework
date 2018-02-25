@@ -41,6 +41,7 @@ namespace Homework
         private static MediaPlayer medicKitPlayer;
         private static MediaPlayer bulletHitPlayer;
         private static MediaPlayer musicPlayer;
+        public static readonly string resourcesPath = Directory.GetParent(Directory.GetCurrentDirectory()).Parent?.Parent?.FullName;
 
         private const int updateRate=100;         //Интервал срабатывания обновления состояния игры
         private const int spawnInterval=1000;     //Интервал создания новой партии астероидов
@@ -109,13 +110,13 @@ namespace Homework
             form.KeyDown += Form_KeyDown;
 
             asteroidHitPlayer=new MediaPlayer();
-            asteroidHitPlayer.Open(new Uri(@"Homework1\Sound\ShipExplosion.wav", UriKind.Relative));
+            asteroidHitPlayer.Open(new Uri(Path.Combine(resourcesPath,@"Resources\Sound\ShipExplosion.wav"), UriKind.Relative));
             bulletHitPlayer = new MediaPlayer();
-            bulletHitPlayer.Open(new Uri(@"Homework1\Sound\AsretoidExplosion.wav", UriKind.Relative));
+            bulletHitPlayer.Open(new Uri(Path.Combine(resourcesPath, @"Resources\Sound\AsretoidExplosion.wav"), UriKind.Relative));
             musicPlayer = new MediaPlayer();
-            musicPlayer.Open(new Uri(@"Homework1\Sound\Music.wav", UriKind.Relative));
+            musicPlayer.Open(new Uri(Path.Combine(resourcesPath, @"Resources\Sound\Music.wav"), UriKind.Relative));
             medicKitPlayer = new MediaPlayer();
-            medicKitPlayer.Open(new Uri(@"Homework1\Sound\Heal.wav", UriKind.Relative));
+            medicKitPlayer.Open(new Uri(Path.Combine(resourcesPath, @"Resources\Sound\Heal.wav"), UriKind.Relative));
             musicPlayer.MediaEnded += Media_Ended;
 
             overlay = new Overlay(form, ChangeSpeed, () => musicPlayer?.Stop());
@@ -147,7 +148,7 @@ namespace Homework
                 case Keys.Right:
                     player.MoveRight();
                     break;
-                case Keys.End:
+                case Keys.Escape:
                     Pause();
                     break;
             }
@@ -214,8 +215,8 @@ namespace Homework
 
             screenSpaceController = new ScreenSpaceController(SpawnType.OnScreen);
 
-            AsteroidFactory.Init(@"Homework1\Asteroids");
-            MedicKitFactory.Init(@"Homework1\MedicKits");
+            AsteroidFactory.Init(Path.Combine(resourcesPath, @"Resources\Asteroids"));
+            MedicKitFactory.Init(Path.Combine(resourcesPath, @"Resources\MedicKits"));
 
             string shipsPath=string.Empty;
             string bulletsPath= string.Empty;
@@ -223,12 +224,12 @@ namespace Homework
             switch (gameMode)
             {
                 case GameMode.Matches:
-                    shipsPath = @"Homework1\Ships\Matchboxes";
-                    bulletsPath = @"Homework1\Bullets\Matches";
+                    shipsPath = Path.Combine(resourcesPath, @"Resources\Ships\Matchboxes");
+                    bulletsPath = Path.Combine(resourcesPath, @"Resources\Bullets\Matches");
                     break;
                 case GameMode.Starships:
-                    shipsPath = @"Homework1\Ships\Starships";
-                    bulletsPath = @"Homework1\Bullets\Shells";
+                    shipsPath = Path.Combine(resourcesPath, @"Resources\Ships\Starships");
+                    bulletsPath = Path.Combine(resourcesPath, @"Resources\Bullets\Shells");
                     break;
             }
             StarshipFactory.Init(shipsPath);
@@ -245,10 +246,10 @@ namespace Homework
             player = (Starship) new StarshipFactory().Create();
             overlay.CreateHpBar();
 
-            List<Image> imageList = SpaceObjectFactory.ImagesLoad(@"Homework1\Stars");
+            List<Image> imageList = SpaceObjectFactory.ImagesLoad(Path.Combine(resourcesPath, @"Resources\Stars"));
 
             int iMax = imageList.Count;
-            imageList.AddRange(SpaceObjectFactory.ImagesLoad(@"Homework1\StaticObjects"));
+            imageList.AddRange(SpaceObjectFactory.ImagesLoad(Path.Combine(resourcesPath, @"Resources\StaticObjects")));
             if (imageList.Count == 0)
             {
                 throw new NullReferenceException("Файлы повреждены или отсутсвуют");
