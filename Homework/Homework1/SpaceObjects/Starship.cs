@@ -105,7 +105,7 @@ namespace Homework
 
             if (spaceObject is MedicKit)
             {
-                Hitpoints += spaceObject.Power;
+                Hitpoints += spaceObject.Power*4;
                 if (Hitpoints > maxHitpoints)
                 {
                     Hitpoints = maxHitpoints;

@@ -20,21 +20,37 @@ namespace Homework
         private Panel mainMenu;
         private Panel gameModeMenu;
         private Panel optionsMenu;
+        private Panel gameOptionsMenu;
+        private Panel soundOptionsMenu;
         private ProgressBar hpBar;
         private Button mainMenuButton;
         private Action MusicStop;
-        
+        private Action<int> ChangeSpeed;
+        private Button previousButton;
+        private Button nextButton;
+
+        private int gameSpeed=100;
+        private int speedStep = minStep;
+
+        private const int maxSpeed = 1000;
+        private const int minStep = 10;
+        private const int maxStep = 50;
         private const string matchboxPath = @"Homework1\Ships\Matchboxes\Matchbox.jpg";
         private const string starshipPath = @"Homework1\Ships\Starships\Starship.jpg";
-        
-        public Overlay(Form form, Action musicStop)
+        private const string previousButtonPath = @"Homework1\Buttons\Previous.jpg";
+        private const string nextButtonPath = @"Homework1\Buttons\Next.jpg";
+
+        public Overlay(Form form, Action<int> changeSpeed, Action musicStop)
         {
             this.form = form;
             CreateMainMenu();
             CreateGameModeMenu();
             CreateOptionsMenu();
+            CreateGameOptionsMenu();
+            CreateSoundOptionsMenu();
             CreateMainMenuButton();
             MusicStop = musicStop;
+            ChangeSpeed = changeSpeed;
         }
 
         #endregion
@@ -86,7 +102,7 @@ namespace Homework
             return new RadioButton
             {
                 AutoSize = true,
-                Font = new Font("Franklin Gothic Medium", 12F, FontStyle.Regular, 
+                Font = new Font("Franklin Gothic Medium", 12F, FontStyle.Regular,
                     GraphicsUnit.Point, ((byte)(204))),
                 Size = new Size(98, 25),
                 TextImageRelation = TextImageRelation.ImageBeforeText,
@@ -98,7 +114,7 @@ namespace Homework
         {
             return new TrackBar
             {
-                AutoSize=false,
+                AutoSize = false,
                 Value = 10,
                 Size = new Size(140, 25),
             };
@@ -189,7 +205,7 @@ namespace Homework
 
             RadioButton starshipRadioButton = CreateRadioButtonTemplate();
             starshipRadioButton.Checked = false;
-            starshipRadioButton.Image = new Bitmap(Image.FromFile(starshipPath),starshipRadioButton.Font.Height, starshipRadioButton.Font.Height);
+            starshipRadioButton.Image = new Bitmap(Image.FromFile(starshipPath), starshipRadioButton.Font.Height, starshipRadioButton.Font.Height);
             starshipRadioButton.Location = new Point(100, 112);
             starshipRadioButton.Name = "starshipRadioButton";
             starshipRadioButton.Text = "Starships";
@@ -227,14 +243,14 @@ namespace Homework
         {
             ParentPanelHide(sender);
 
-            Game.Init(((RadioButton)gameModeMenu.Controls.Find("matchboxRadioButton", false).First()).Checked ? 
+            Game.Init(((RadioButton)gameModeMenu.Controls.Find("matchboxRadioButton", false).First()).Checked ?
                  GameMode.Matches : GameMode.Starships);
         }
 
         #endregion
 
         /// <summary>
-        /// Меню опций
+        /// Создыние меню опций с кнопками "Game Options", "Sound Options", "Back".
         /// </summary>
         #region OptionsMenu
 
@@ -242,11 +258,25 @@ namespace Homework
         {
             optionsMenu = CreatePanelTemplate();
             optionsMenu.Visible = false;
-            Label optionsLabel = CreateLabelTemplate();
-            optionsLabel.Text = "Options:";
-            optionsMenu.Controls.Add(optionsLabel);
 
-            CreateSoundOptions();
+            Label optionsMenuLabel = CreateLabelTemplate();
+            optionsMenuLabel.Text = "Options:";
+
+            optionsMenu.Controls.Add(optionsMenuLabel);
+
+            Button gameOptions_button = CreateButtonTemplate();
+            gameOptions_button.Location = new Point(80, 130);
+            gameOptions_button.Text = "Game Options";
+
+            gameOptions_button.Click += gameOptions_button_Click;
+            optionsMenu.Controls.Add(gameOptions_button);
+
+            Button soundOptions_button = CreateButtonTemplate();
+            soundOptions_button.Location = new Point(80, 210);
+            soundOptions_button.Text = "Sound Options";
+
+            soundOptions_button.Click += soundOptions_button_Click;
+            optionsMenu.Controls.Add(soundOptions_button);
 
             Button back_button = CreateButtonTemplate();
             back_button.Location = new Point(80, 290);
@@ -259,24 +289,176 @@ namespace Homework
             form.Controls.Add(optionsMenu);
         }
 
+        private void soundOptions_button_Click(object sender, EventArgs e)
+        {
+            ParentPanelHide(sender);
+            soundOptionsMenu.Visible = true;
+        }
+
+        private void gameOptions_button_Click(object sender, EventArgs e)
+        {
+            ParentPanelHide(sender);
+            gameOptionsMenu.Visible = true;
+        }
+
+        #endregion
+
+        /// <summary>
+        /// Меню игровых опций
+        /// </summary>
+        #region GameOptionsMenu
+
+        private void CreateGameOptionsMenu()
+        {
+            gameOptionsMenu = CreatePanelTemplate();
+            gameOptionsMenu.Visible = false;
+            Label gameOptionsLabel = CreateLabelTemplate();
+            gameOptionsLabel.Text = "Game Options:";
+            gameOptionsLabel.Location = new Point(90, 55);
+            gameOptionsMenu.Controls.Add(gameOptionsLabel);
+
+            CreateSpeedOptions();
+
+            Button back_button = CreateButtonTemplate();
+            back_button.Location = new Point(80, 290);
+            back_button.Text = "Back";
+
+            back_button.Click += back_button_Click;
+            gameOptionsMenu.Controls.Add(back_button);
+
+            gameOptionsMenu.Location = new Point(250, 100);
+            form.Controls.Add(gameOptionsMenu);
+        }
+
+        private void CreateSpeedOptions()
+        {
+            Label speedLabel = new Label
+            {
+                AutoSize = true,
+                Font = new Font("Franklin Gothic Medium", 9.75F, FontStyle.Regular,
+                    GraphicsUnit.Point, ((byte)(204))),
+                Location = new Point(80, 175),
+                Size = new Size(46, 17),
+                Text = "Speed:"
+            };
+            gameOptionsMenu.Controls.Add(speedLabel);
+
+            previousButton = new Button
+            {
+                Image = new Bitmap(Image.FromFile(previousButtonPath), 20, 20),
+                Location = new Point(140, 173),
+                Size = new Size(20, 20),
+                UseVisualStyleBackColor = true
+            };
+
+            previousButton.Click += previousButton_Click;
+            gameOptionsMenu.Controls.Add(previousButton);
+
+            TextBox speedTextBox = new TextBox
+            {
+                Font = new Font("Franklin Gothic Medium", 9.75F, FontStyle.Regular, GraphicsUnit.Point, ((byte)(204))),
+                Location = new Point(160, 172),
+                ReadOnly = true,
+                Name= "speedTextBox",
+                Size = new Size(40, 22),
+                Text = $"{gameSpeed}%",
+                TextAlign = HorizontalAlignment.Center
+            };
+
+            gameOptionsMenu.Controls.Add(speedTextBox);
+
+            nextButton = new Button
+            {
+                Image = new Bitmap(Image.FromFile(nextButtonPath), 20, 20),
+                Location = new Point(200, 173),
+                Size = new Size(20, 20),
+                UseVisualStyleBackColor = true
+            };
+
+            nextButton.Click += nextButton_Click;
+            gameOptionsMenu.Controls.Add(nextButton);
+        }
+
+        private void previousButton_Click(object sender, EventArgs e)
+        {
+            ChangeSpeed(-speedStep);
+            gameSpeed -= speedStep;
+            UpdateSpeedTextBox();
+            nextButton.Enabled = true;
+            speedStep = gameSpeed < 200 ? minStep : maxStep;
+
+            if (gameSpeed<=speedStep)
+            {
+                previousButton.Enabled=false;
+            }
+        }
+
+        private void nextButton_Click(object sender, EventArgs e)
+        {
+            ChangeSpeed(speedStep);
+            gameSpeed += speedStep;
+            UpdateSpeedTextBox();
+            previousButton.Enabled = true;
+            speedStep = gameSpeed < 200 ? minStep : maxStep;
+            
+            if (gameSpeed > maxSpeed-speedStep)
+            {
+                nextButton.Enabled = false;
+            }
+        }
+
+        private void UpdateSpeedTextBox()
+        {
+            ((TextBox) gameOptionsMenu.Controls.Find("speedTextBox", false).First()).Text = $"{gameSpeed}%";
+        }
+
+        #endregion
+
+        /// <summary>
+        /// Меню звуковых опций
+        /// </summary>
+        #region SoundOptionsMenu
+
+        private void CreateSoundOptionsMenu()
+        {
+            soundOptionsMenu = CreatePanelTemplate();
+            soundOptionsMenu.Visible = false;
+            Label optionsLabel = CreateLabelTemplate();
+            optionsLabel.Text = "Sound Options:";
+            optionsLabel.Location = new Point(90, 55);
+            soundOptionsMenu.Controls.Add(optionsLabel);
+
+            CreateSoundOptions();
+
+            Button back_button = CreateButtonTemplate();
+            back_button.Location = new Point(80, 290);
+            back_button.Text = "Back";
+
+            back_button.Click += back_button_Click;
+            soundOptionsMenu.Controls.Add(back_button);
+
+            soundOptionsMenu.Location = new Point(250, 100);
+            form.Controls.Add(soundOptionsMenu);
+        }
+
         private void CreateSoundOptions()
         {
             Label soundVolumeLabel = new Label
             {
                 AutoSize = true,
                 Font = new Font("Franklin Gothic Medium", 9.75F, FontStyle.Regular,
-                    GraphicsUnit.Point, ((byte) (204))),
+                    GraphicsUnit.Point, ((byte)(204))),
                 Location = new Point(105, 114),
                 Size = new Size(88, 17),
-                Text="Sound Volume"
+                Text = "Sound Volume"
             };
-            optionsMenu.Controls.Add(soundVolumeLabel);
+            soundOptionsMenu.Controls.Add(soundVolumeLabel);
 
             TrackBar soundTrackBar = CreateTrackBarTemplate();
             soundTrackBar.Location = new Point(80, 140);
 
             soundTrackBar.Scroll += soundTrackBar_Scroll;
-            optionsMenu.Controls.Add(soundTrackBar);
+            soundOptionsMenu.Controls.Add(soundTrackBar);
 
             Label musicVolumeLabel = new Label
             {
@@ -287,19 +469,19 @@ namespace Homework
                 Size = new Size(88, 17),
                 Text = "Music Volume"
             };
-            optionsMenu.Controls.Add(musicVolumeLabel);
+            soundOptionsMenu.Controls.Add(musicVolumeLabel);
 
             TrackBar musicTrackBar = CreateTrackBarTemplate();
             musicTrackBar.Location = new Point(80, 229);
 
             musicTrackBar.Scroll += musicTrackBar_Scroll;
-            optionsMenu.Controls.Add(musicTrackBar);
+            soundOptionsMenu.Controls.Add(musicTrackBar);
         }
 
         private void soundTrackBar_Scroll(object sender, EventArgs e)
         {
-            Game.SetSoundVolumeLevel(0.5d*((TrackBar)sender).Value/ ((TrackBar)sender).Maximum);
-           //Utility.waveOutSetVolume(0, (uint)(Convert.ToDouble(0xFFFF0000) * ((TrackBar)sender).Value / ((TrackBar)sender).Maximum));
+            Game.SetSoundVolumeLevel(0.5d * ((TrackBar)sender).Value / ((TrackBar)sender).Maximum);
+            //Utility.waveOutSetVolume(0, (uint)(Convert.ToDouble(0xFFFF0000) * ((TrackBar)sender).Value / ((TrackBar)sender).Maximum));
         }
 
         private void musicTrackBar_Scroll(object sender, EventArgs e)
@@ -345,7 +527,7 @@ namespace Homework
         /// <param name="value"></param>
         public void UpdateHpBar(Point? location, int? value)
         {
-            if (hpBar!=null)
+            if (hpBar != null)
             {
                 hpBar.Location = location ?? new Point(-100, -100);
                 hpBar.Value = value ?? 0;

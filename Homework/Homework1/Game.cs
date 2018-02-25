@@ -24,26 +24,29 @@ namespace Homework
         #region Vars and Props
 
         public static Random randomizer = new Random();
-
+        
         public static BufferedGraphics Buffer;
 
         private static Starship player;
         private static BufferedGraphicsContext context;
-        private static Timer updateTimer = new Timer { Interval = updateRate };
-        private static Timer spawnTimer = new Timer { Interval = spawnInterval };
+        private static Timer updateTimer;
+        private static Timer spawnTimer;
         private static int width;
         private static int height;
+        private static int score;
+        private static int gameSpeed = 100;
         private static List<SpaceObject> spaceObjects;
         private static List<Bullet> bullets = new List<Bullet>();
         private static ScreenSpaceController screenSpaceController;
         private static Overlay overlay;
         private static MediaPlayer asteroidHitPlayer=new MediaPlayer();
+        private static MediaPlayer medicKitPlayer = new MediaPlayer();
         private static MediaPlayer bulletHitPlayer=new MediaPlayer();
         private static MediaPlayer musicPlayer=new MediaPlayer();
 
-        private const int updateRate = 100;         //Интервал срабатывания обновления состояния игры
-        private const int spawnInterval=1000;     //Интервал создания новой партии астероидов
-        private const int spawnCount = 5;           //Количество астероидов в партии
+        private const int updateRate=100;         //Интервал срабатывания обновления состояния игры
+        private const int spawnInterval=1000;      //Интервал создания новой партии астероидов
+        private const int spawnCount = 5;         //Количество астероидов в партии
 
         // Свойства
         // Ширина и высота игрового поля
@@ -105,12 +108,13 @@ namespace Homework
             // для того, чтобы рисовать в буфере
             Buffer = context.Allocate(graphics, new Rectangle(0, 0, Width, Height));
             
+            updateTimer=new Timer{Interval=updateRate};
             updateTimer.Start();
             updateTimer.Tick += Timer_Tick;
 
             form.KeyDown += Form_KeyDown;
 
-            overlay = new Overlay(form, () => musicPlayer?.Stop());
+            overlay = new Overlay(form, x=>gameSpeed+=x, () => musicPlayer?.Stop());
 
             return true;
         }
@@ -148,7 +152,6 @@ namespace Homework
             }
         }
 
-
         #endregion
 
         #region Start
@@ -183,6 +186,7 @@ namespace Homework
             asteroidHitPlayer.Open(new Uri(@"Homework1\Sound\ShipExplosion.wav",UriKind.Relative));
             bulletHitPlayer.Open(new Uri(@"Homework1\Sound\AsretoidExplosion.wav", UriKind.Relative));
             musicPlayer.Open(new Uri(@"Homework1\Sound\Music.wav", UriKind.Relative));
+            medicKitPlayer.Open(new Uri(@"Homework1\Sound\Heal.wav", UriKind.Relative));
             musicPlayer.MediaEnded += Media_Ended;
             
             Start();
@@ -254,8 +258,11 @@ namespace Homework
 
             Form.ActiveForm?.Focus();
 
+            spawnTimer = new Timer {Interval = Convert.ToInt32(spawnInterval / ((double) gameSpeed / 100))};
             spawnTimer.Start();
             spawnTimer.Tick += SpawnTimer_Tick;
+
+            updateTimer.Interval = Convert.ToInt32(updateRate / ((double)gameSpeed / 100));
 
             musicPlayer.Play();
         }
@@ -320,6 +327,12 @@ namespace Homework
 
             player?.Draw();
 
+            if (musicPlayer.CanPause)
+            {
+                Buffer.Graphics.DrawString($"Score {score}", new Font("Franklin Gothic Medium", 30F, FontStyle.Bold,
+                    GraphicsUnit.Point, ((byte)(204))), Brushes.White, new RectangleF(500, 0, 300, 50));
+            }
+
             try
             {
                 Buffer.Render();
@@ -352,6 +365,11 @@ namespace Homework
                     {
                         if (CheckCollision(spaceObjects[i]))
                         {
+                            if (spaceObjects[i].GetType()!=typeof(MedicKit))
+                            {
+                                score += spaceObjects[i].Power;
+                            }
+                            
                             spaceObjects[i].Dispose();
                         }
                     }
@@ -371,8 +389,18 @@ namespace Homework
         {
             if (player.Collide(obj))
             {
-                asteroidHitPlayer.Stop();
-                asteroidHitPlayer.Play();
+                if (obj is MedicKit)
+                {
+                    medicKitPlayer.Stop();
+                    medicKitPlayer.Play();
+                }
+
+                if (obj is Asteroid)
+                {
+                    asteroidHitPlayer.Stop();
+                    asteroidHitPlayer.Play();
+                }
+                
                 player.GetDamageOrHeal(obj);
                 return true;
             }

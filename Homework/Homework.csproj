@@ -105,5 +105,11 @@
   <ItemGroup>
     <Folder Include="Resources\" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="bin\Debug\Homework1\Buttons\Previous.jpg" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="bin\Debug\Homework1\Buttons\Next.jpg" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
