@@ -4,9 +4,6 @@ using System.Diagnostics;
 using System.Drawing;
 using System.IO;
 using System.Linq;
-using System.Media;
-using System.Runtime.CompilerServices;
-using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -27,6 +24,7 @@ namespace Homework
         
         public static BufferedGraphics Buffer;
 
+        private static bool isActive;
         private static Starship player;
         private static BufferedGraphicsContext context;
         private static Timer updateTimer;
@@ -36,16 +34,16 @@ namespace Homework
         private static int score;
         private static int gameSpeed = 100;
         private static List<SpaceObject> spaceObjects;
-        private static List<Bullet> bullets = new List<Bullet>();
+        private static List<Bullet> bullets;
         private static ScreenSpaceController screenSpaceController;
         private static Overlay overlay;
-        private static MediaPlayer asteroidHitPlayer=new MediaPlayer();
-        private static MediaPlayer medicKitPlayer = new MediaPlayer();
-        private static MediaPlayer bulletHitPlayer=new MediaPlayer();
-        private static MediaPlayer musicPlayer=new MediaPlayer();
+        private static MediaPlayer asteroidHitPlayer;
+        private static MediaPlayer medicKitPlayer;
+        private static MediaPlayer bulletHitPlayer;
+        private static MediaPlayer musicPlayer;
 
         private const int updateRate=100;         //Интервал срабатывания обновления состояния игры
-        private const int spawnInterval=1000;      //Интервал создания новой партии астероидов
+        private const int spawnInterval=1000;     //Интервал создания новой партии астероидов
         private const int spawnCount = 5;         //Количество астероидов в партии
 
         // Свойства
@@ -74,7 +72,6 @@ namespace Homework
                 height = value;
             }
         }
-
 
         #endregion
 
@@ -107,22 +104,23 @@ namespace Homework
             // Связываем буфер в памяти с графическим объектом.
             // для того, чтобы рисовать в буфере
             Buffer = context.Allocate(graphics, new Rectangle(0, 0, Width, Height));
-            
-            updateTimer=new Timer{Interval=updateRate};
-            updateTimer.Start();
-            updateTimer.Tick += Timer_Tick;
 
+            form.BackColor = Color.Black;
             form.KeyDown += Form_KeyDown;
 
-            overlay = new Overlay(form, x=>gameSpeed+=x, () => musicPlayer?.Stop());
+            asteroidHitPlayer=new MediaPlayer();
+            asteroidHitPlayer.Open(new Uri(@"Homework1\Sound\ShipExplosion.wav", UriKind.Relative));
+            bulletHitPlayer = new MediaPlayer();
+            bulletHitPlayer.Open(new Uri(@"Homework1\Sound\AsretoidExplosion.wav", UriKind.Relative));
+            musicPlayer = new MediaPlayer();
+            musicPlayer.Open(new Uri(@"Homework1\Sound\Music.wav", UriKind.Relative));
+            medicKitPlayer = new MediaPlayer();
+            medicKitPlayer.Open(new Uri(@"Homework1\Sound\Heal.wav", UriKind.Relative));
+            musicPlayer.MediaEnded += Media_Ended;
+
+            overlay = new Overlay(form, ChangeSpeed, () => musicPlayer?.Stop());
 
             return true;
-        }
-
-        private static void Timer_Tick(object sender, EventArgs e)
-        {
-            Draw();
-            Update();
         }
 
         /// <summary>
@@ -149,47 +147,29 @@ namespace Homework
                 case Keys.Right:
                     player.MoveRight();
                     break;
+                case Keys.End:
+                    Pause();
+                    break;
             }
         }
 
-        #endregion
-
-        #region Start
-
         /// <summary>
-        /// Инициализация Фабрик и звуковой составляющей
+        /// Изменение скорости игры
         /// </summary>
-        public static void Init(GameMode gameMode)
+        /// <param name="change"></param>
+        private static void ChangeSpeed(int change)
         {
-            screenSpaceController = new ScreenSpaceController(SpawnType.OnScreen);
+            gameSpeed += change;
 
-            AsteroidFactory.Init(@"Homework1\Asteroids");
-            MedicKitFactory.Init(@"Homework1\MedicKits");
-
-            string shipsPath=string.Empty;
-            string bulletsPath= string.Empty;
-
-            switch (gameMode)
+            if (updateTimer!=null)
             {
-                case GameMode.Matches:
-                    shipsPath = @"Homework1\Ships\Matchboxes";
-                    bulletsPath = @"Homework1\Bullets\Matches";
-                    break;
-                case GameMode.Starships:
-                    shipsPath = @"Homework1\Ships\Starships";
-                    bulletsPath = @"Homework1\Bullets\Shells";
-                    break;
+                updateTimer.Interval = Convert.ToInt32(updateRate / ((double)gameSpeed / 100));
             }
-            StarshipFactory.Init(shipsPath);
-            BulletFactory.Init(bulletsPath);
 
-            asteroidHitPlayer.Open(new Uri(@"Homework1\Sound\ShipExplosion.wav",UriKind.Relative));
-            bulletHitPlayer.Open(new Uri(@"Homework1\Sound\AsretoidExplosion.wav", UriKind.Relative));
-            musicPlayer.Open(new Uri(@"Homework1\Sound\Music.wav", UriKind.Relative));
-            medicKitPlayer.Open(new Uri(@"Homework1\Sound\Heal.wav", UriKind.Relative));
-            musicPlayer.MediaEnded += Media_Ended;
-            
-            Start();
+            if (spawnTimer != null)
+            {
+                spawnTimer.Interval = Convert.ToInt32(spawnInterval / ((double)gameSpeed / 100));
+            }
         }
 
         /// <summary>
@@ -216,9 +196,45 @@ namespace Homework
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        private static void Media_Ended(object sender,EventArgs e)
+        private static void Media_Ended(object sender, EventArgs e)
         {
-            musicPlayer.Position=TimeSpan.Zero;
+            musicPlayer.Position = TimeSpan.Zero;
+        }
+
+        #endregion
+
+        #region Start
+
+        /// <summary>
+        /// Инициализация Фабрик и звуковой составляющей
+        /// </summary>
+        public static void Init(GameMode gameMode)
+        {
+            score = 0;
+
+            screenSpaceController = new ScreenSpaceController(SpawnType.OnScreen);
+
+            AsteroidFactory.Init(@"Homework1\Asteroids");
+            MedicKitFactory.Init(@"Homework1\MedicKits");
+
+            string shipsPath=string.Empty;
+            string bulletsPath= string.Empty;
+
+            switch (gameMode)
+            {
+                case GameMode.Matches:
+                    shipsPath = @"Homework1\Ships\Matchboxes";
+                    bulletsPath = @"Homework1\Bullets\Matches";
+                    break;
+                case GameMode.Starships:
+                    shipsPath = @"Homework1\Ships\Starships";
+                    bulletsPath = @"Homework1\Bullets\Shells";
+                    break;
+            }
+            StarshipFactory.Init(shipsPath);
+            BulletFactory.Init(bulletsPath);
+
+            Start();
         }
 
         /// <summary>
@@ -238,6 +254,7 @@ namespace Homework
                 throw new NullReferenceException("Файлы повреждены или отсутсвуют");
             }
 
+            bullets = new List<Bullet>();
             spaceObjects = new List<SpaceObject>();
             try
             {
@@ -258,13 +275,27 @@ namespace Homework
 
             Form.ActiveForm?.Focus();
 
+            updateTimer = new Timer { Interval = Convert.ToInt32(updateRate / ((double)gameSpeed / 100)) };
+            updateTimer.Start();
+            updateTimer.Tick += Timer_Tick;
+
             spawnTimer = new Timer {Interval = Convert.ToInt32(spawnInterval / ((double) gameSpeed / 100))};
             spawnTimer.Start();
             spawnTimer.Tick += SpawnTimer_Tick;
 
-            updateTimer.Interval = Convert.ToInt32(updateRate / ((double)gameSpeed / 100));
-
             musicPlayer.Play();
+            isActive = true;
+        }
+
+        /// <summary>
+        /// Отображение игровых обьектов и обновление их состояний
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private static void Timer_Tick(object sender, EventArgs e)
+        {
+            Draw();
+            Update();
         }
 
         /// <summary>
@@ -327,7 +358,7 @@ namespace Homework
 
             player?.Draw();
 
-            if (musicPlayer.CanPause)
+            if (isActive)
             {
                 Buffer.Graphics.DrawString($"Score {score}", new Font("Franklin Gothic Medium", 30F, FontStyle.Bold,
                     GraphicsUnit.Point, ((byte)(204))), Brushes.White, new RectangleF(500, 0, 300, 50));
@@ -434,6 +465,26 @@ namespace Homework
             }
         }
 
+        /// <summary>
+        /// Пауза игры
+        /// </summary>
+        private static void Pause()
+        {
+            updateTimer.Stop();
+            spawnTimer.Stop();
+            overlay.DisplayPauseMenu();
+        }
+
+        /// <summary>
+        /// Возобновление игры
+        /// </summary>
+        public static void Resume()
+        {
+            updateTimer.Start();
+            spawnTimer.Start();
+            Form.ActiveForm?.Focus();
+        }
+
         #endregion
 
         #region EndOfTheGame
@@ -445,8 +496,9 @@ namespace Homework
         {
             updateTimer.Stop();
             spawnTimer.Stop();
-
             overlay.UpdateHpBar(player?.HpBarPoint, player?.Hitpoints);
+            isActive = false;
+
             Buffer.Graphics.DrawString("Game Over", new Font("Franklin Gothic Medium", 80F, FontStyle.Bold,
                 GraphicsUnit.Point, ((byte)(204))), Brushes.Red, 100, 200);
             overlay.DisplayMainMenuButton();

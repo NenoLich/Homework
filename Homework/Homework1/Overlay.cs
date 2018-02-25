@@ -28,7 +28,9 @@ namespace Homework
         private Action<int> ChangeSpeed;
         private Button previousButton;
         private Button nextButton;
-
+        private Button newGame_button;
+        private Button resumeGame_button;
+        
         private int gameSpeed=100;
         private int speedStep = minStep;
 
@@ -44,6 +46,7 @@ namespace Homework
         {
             this.form = form;
             CreateMainMenu();
+            CreatPauseMenu();
             CreateGameModeMenu();
             CreateOptionsMenu();
             CreateGameOptionsMenu();
@@ -66,7 +69,8 @@ namespace Homework
             return new Panel
             {
                 Size = new Size(300, 400),
-                BorderStyle = BorderStyle.Fixed3D
+                BorderStyle = BorderStyle.Fixed3D,
+                BackColor=Color.Lavender
             };
         }
 
@@ -122,12 +126,12 @@ namespace Homework
 
         #endregion
 
+        /// <summary>
+        /// Создание главного меню с кнопками "New Game", "Options", "Exit".
+        /// </summary>
         #region MainMenu
 
-        /// <summary>
-        /// Создыние главного меню с кнопками "New Game", "Options", "Exit".
-        /// </summary>
-        /// <param name="form"></param>
+
         private void CreateMainMenu()
         {
             mainMenu = CreatePanelTemplate();
@@ -137,7 +141,7 @@ namespace Homework
 
             mainMenu.Controls.Add(mainMenuLabel);
 
-            Button newGame_button = CreateButtonTemplate();
+            newGame_button = CreateButtonTemplate();
             newGame_button.Location = new Point(80, 130);
             newGame_button.Text = "New Game";
 
@@ -186,6 +190,42 @@ namespace Homework
         {
             Button button = sender as Button;
             button.Parent.Visible = false;
+        }
+
+        #endregion
+
+        /// <summary>
+        /// Создание меню паузы с кнопками "Resume Game", "Options", "Exit".
+        /// </summary>
+        #region PauseMenu
+
+        private void CreatPauseMenu()
+        {
+            resumeGame_button = CreateButtonTemplate();
+            resumeGame_button.Location = new Point(80, 130);
+            resumeGame_button.Text = "Resume Game";
+            resumeGame_button.Visible = false;
+
+            resumeGame_button.Click += resumeGame_button_Click;
+            mainMenu.Controls.Add(resumeGame_button);
+        }
+
+        private void resumeGame_button_Click(object sender, EventArgs e)
+        {
+            ParentPanelHide(sender);
+            resumeGame_button.Visible = false;
+            newGame_button.Visible = true;
+
+            hpBar.Visible = true;
+            Game.Resume();
+        }
+
+        public void DisplayPauseMenu()
+        {
+            hpBar.Visible = false;
+            resumeGame_button.Visible = true;
+            newGame_button.Visible = false;
+            mainMenu.Visible = true;
         }
 
         #endregion
@@ -250,7 +290,7 @@ namespace Homework
         #endregion
 
         /// <summary>
-        /// Создыние меню опций с кнопками "Game Options", "Sound Options", "Back".
+        /// Создание меню опций с кнопками "Game Options", "Sound Options", "Back".
         /// </summary>
         #region OptionsMenu
 
@@ -505,19 +545,21 @@ namespace Homework
         /// </summary>
         public void CreateHpBar()
         {
-            hpBar = new ProgressBar
+            if (hpBar is null)
             {
-                Maximum = 150,
-                Size = new Size(80, 8),
-                Step = 1,
-                Style = ProgressBarStyle.Continuous,
-            };
+                hpBar = new ProgressBar
+                {
+                    Maximum = 150,
+                    Size = new Size(80, 8),
+                    Step = 1,
+                    Style = ProgressBarStyle.Continuous,
+                };
 
+                //hpBar.DataBindings.Add("Value",Game.player, "Hitpoints");
+                //hpBar.DataBindings.Add("Location", Game.player, "HpBarPoint");
 
-            //hpBar.DataBindings.Add("Value",Game.player, "Hitpoints");
-            //hpBar.DataBindings.Add("Location", Game.player, "HpBarPoint");
-
-            form.Controls.Add(hpBar);
+                form.Controls.Add(hpBar);
+            }
         }
 
         /// <summary>
